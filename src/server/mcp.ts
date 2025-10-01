@@ -182,7 +182,7 @@ export class MCPHandler implements IMCPHandler {
   }
 
   /**
-   * Handles incoming MCP requests with proper session management
+   * Handles incoming MCP requests with proper session management following MCP spec
    */
   private async handleRequest(req: AuthenticatedRequest, res: express.Response): Promise<void> {
     const startTime = Date.now();
@@ -197,36 +197,51 @@ export class MCPHandler implements IMCPHandler {
         'x-session-id': req.headers['x-session-id'],
         'authorization': req.headers['authorization'] ? 'Bearer ***' : 'none'
       },
+      body: req.body ? { method: req.body.method, id: req.body.id } : 'no body',
       timestamp: new Date().toISOString()
     });
 
     try {
-      res.header("Access-Control-Expose-Headers", "mcp-session-id, x-session-id, Content-Type, Authorization");
-      let sessionId =
-        (req.headers["mcp-session-id"] as string) || (req.headers["x-session-id"] as string);
-      const isInitRequest = !sessionId;
+      // Set proper CORS headers including capitalized MCP header
+      res.header("Access-Control-Expose-Headers", "Mcp-Session-Id, mcp-session-id, x-session-id, Content-Type, Authorization");
+
+      const sessionId = req.headers["mcp-session-id"] as string | undefined;
       let sessionInfo: SessionInfo | undefined;
-      if (isInitRequest) {
-        // Create new session for initialization
-        sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+
+      if (sessionId && this.sessions.has(sessionId)) {
+        // Reuse existing session
+        sessionInfo = this.sessions.get(sessionId)!;
+        sessionInfo.lastAccessed = new Date();
+
+        console.log("📡 [MCP] Reusing existing session", {
+          sessionId,
+          timestamp: new Date().toISOString()
+        });
+
+        // Let the session's transport handle the request
+        await sessionInfo.transport.handleRequest(req, res);
+
+      } else if (!sessionId && this.isInitializeRequest(req.body)) {
+        // Create new session for MCP initialization
+        const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
         // Extract auth info if available
-        const sessionAuth =
-          req.auth && req.auth.extra?.redditAccessToken
-            ? {
-                accessToken: String(req.auth.extra.redditAccessToken || ""),
-                refreshToken: String(req.auth.extra.redditRefreshToken || ""),
-                username: String(req.auth.extra.userId || "unknown"),
-              }
-            : undefined;
-        const server = this.createServer(sessionId, sessionAuth);
+        const sessionAuth = req.auth?.extra?.redditAccessToken ? {
+          accessToken: String(req.auth.extra.redditAccessToken || ""),
+          refreshToken: String(req.auth.extra.redditRefreshToken || ""),
+          username: String(req.auth.extra.userId || "unknown"),
+        } : undefined;
+
         const transport = new StreamableHTTPServerTransport({
-          sessionIdGenerator: () => sessionId!,
+          sessionIdGenerator: () => newSessionId,
           onsessioninitialized: (sid) => {
-            logger.info(`🔗 New session initialized: ${sid}`);
-          },
+            logger.info(`🔗 Session initialized: ${sid}`);
+          }
         });
+
+        const server = this.createServer(newSessionId, sessionAuth);
         await server.connect(transport);
+
         sessionInfo = {
           server,
           transport,
@@ -234,88 +249,40 @@ export class MCPHandler implements IMCPHandler {
           createdAt: new Date(),
           lastAccessed: new Date(),
         };
-        this.sessions.set(sessionId, sessionInfo);
-        logger.debug(`📝 Created new session with dedicated server: ${sessionId}`);
 
-        console.log("📡 [MCP] New session created", {
-          sessionId,
+        this.sessions.set(newSessionId, sessionInfo);
+
+        console.log("📡 [MCP] New session created for initialization", {
+          sessionId: newSessionId,
           hasAuth: !!sessionAuth,
           userId: sessionAuth?.username,
           timestamp: new Date().toISOString()
         });
 
-        // Set session ID headers before transport handles request
-        res.setHeader("mcp-session-id", sessionId);
-        res.setHeader("x-session-id", sessionId);
-
+        // Let the transport handle the request and session headers automatically
         await transport.handleRequest(req, res);
 
-        // Ensure session headers are set after transport handling
-        if (!res.headersSent) {
-          res.setHeader("mcp-session-id", sessionId);
-          res.setHeader("x-session-id", sessionId);
-        }
-
-        console.log("📡 [MCP] Session request handled", {
-          sessionId,
-          method: req.method,
-          timestamp: new Date().toISOString()
-        });
       } else {
-        // Find existing session
-        if (!sessionId) {
-          res.status(400).json({
-            jsonrpc: "2.0",
-            error: {
-              code: -32600,
-              message: "Invalid Request: Missing session ID",
-            },
-            id: null,
-          });
-          return;
-        }
+        // Handle invalid requests
+        const errorMessage = sessionId ? "Session not found" : "Missing session ID or not initialization request";
+        const errorCode = sessionId ? -32001 : -32600;
 
-        sessionInfo = this.sessions.get(sessionId);
-        if (!sessionInfo) {
-          res.status(404).json({
-            jsonrpc: "2.0",
-            error: {
-              code: -32001,
-              message: "Session not found",
-            },
-            id: null,
-          });
-          return;
-        }
-
-        sessionInfo.lastAccessed = new Date();
-
-        // Update auth if provided
-        if (req.auth && req.auth.extra?.redditAccessToken && !sessionInfo.auth) {
-          sessionInfo.auth = {
-            accessToken: String(req.auth.extra.redditAccessToken || ""),
-            refreshToken: String(req.auth.extra.redditRefreshToken || ""),
-            username: String(req.auth.extra.userId || "unknown"),
-          };
-
-          // Recreate server with auth
-          const newServer = this.createServer(sessionId, sessionInfo.auth);
-          await newServer.connect(sessionInfo.transport);
-          sessionInfo.server = newServer;
-        }
-
-        // Set session headers for existing sessions too
-        res.setHeader("mcp-session-id", sessionId);
-        res.setHeader("x-session-id", sessionId);
-
-        // Let the session's transport handle the request
-        await sessionInfo.transport.handleRequest(req, res);
-
-        console.log("📡 [MCP] Existing session request handled", {
+        console.log("📡 [MCP] Invalid request", {
           sessionId,
-          method: req.method,
+          isInitializeRequest: this.isInitializeRequest(req.body),
+          errorMessage,
           timestamp: new Date().toISOString()
         });
+
+        res.status(sessionId ? 404 : 400).json({
+          jsonrpc: "2.0",
+          error: {
+            code: errorCode,
+            message: errorMessage,
+          },
+          id: req.body?.id || null,
+        });
+        return;
       }
 
       logger.debug(`MCP request completed in ${Date.now() - startTime}ms for session ${sessionId}`);
@@ -346,6 +313,13 @@ export class MCPHandler implements IMCPHandler {
         });
       }
     }
+  }
+
+  /**
+   * Checks if the request is an MCP initialization request
+   */
+  private isInitializeRequest(body: any): boolean {
+    return body && body.method === 'initialize';
   }
 
   /**
