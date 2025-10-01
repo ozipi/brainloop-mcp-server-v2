@@ -445,6 +445,15 @@ export class OAuthProvider {
      * Returns JWT containing Reddit tokens for API access.
      */
     app.post("/oauth/token", async (req, res) => {
+      console.log("🔐 [OAUTH] Token exchange request received", {
+        grant_type: req.body.grant_type,
+        has_code: !!req.body.code,
+        has_refresh_token: !!req.body.refresh_token,
+        client_id: req.body.client_id,
+        redirect_uri: req.body.redirect_uri,
+        timestamp: new Date().toISOString()
+      });
+
       const { grant_type, code, redirect_uri, code_verifier, client_id, refresh_token } = req.body;
 
       try {
@@ -562,9 +571,23 @@ export class OAuthProvider {
      * code, and redirects back to client with code.
      */
     app.get("/oauth/google/callback", async (req, res) => {
+      console.log("🔐 [OAUTH] Google callback received", {
+        query: req.query,
+        headers: {
+          'user-agent': req.headers['user-agent'],
+          'referer': req.headers['referer']
+        },
+        timestamp: new Date().toISOString()
+      });
+
       const { code, state, error } = req.query;
 
       if (error) {
+        console.error("🔐 [OAUTH] Google OAuth error", {
+          error,
+          state,
+          timestamp: new Date().toISOString()
+        });
         res.status(400).json({
           error: "access_denied",
           error_description: "User denied authorization",
@@ -594,10 +617,23 @@ export class OAuthProvider {
         }
 
         // Exchange Google code for tokens
+        console.log("🔐 [OAUTH] Exchanging Google code for tokens", {
+          code: code ? `${code}`.substring(0, 20) + "..." : "null",
+          redirectUrl: this.config.REDIRECT_URL,
+          timestamp: new Date().toISOString()
+        });
+
         const googleTokens = await this.exchangeGoogleCode(
           code as string,
           this.config.REDIRECT_URL,
         );
+
+        console.log("🔐 [OAUTH] Google tokens received", {
+          hasAccessToken: !!googleTokens.access_token,
+          hasRefreshToken: !!googleTokens.refresh_token,
+          tokenType: googleTokens.token_type,
+          timestamp: new Date().toISOString()
+        });
 
         // Get user info from Google
         const userResponse = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
@@ -635,6 +671,14 @@ export class OAuthProvider {
         const redirectUrl = new URL(pendingAuth.redirectUri);
         redirectUrl.searchParams.set("code", authorizationCode);
         redirectUrl.searchParams.set("state", pendingAuth.state);
+
+        console.log("🔐 [OAUTH] Redirecting back to client", {
+          redirectUrl: redirectUrl.toString(),
+          authorizationCode: authorizationCode.substring(0, 16) + "...",
+          state: pendingAuth.state,
+          clientId: pendingAuth.clientId,
+          timestamp: new Date().toISOString()
+        });
 
         res.redirect(redirectUrl.toString());
       } catch (error) {
