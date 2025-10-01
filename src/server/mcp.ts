@@ -259,15 +259,25 @@ export class MCPHandler implements IMCPHandler {
           timestamp: new Date().toISOString()
         });
 
-        // Let the transport handle the request and session headers automatically
+        // CRITICAL: Set session headers BEFORE transport handles request
+        res.setHeader("mcp-session-id", newSessionId);
+        res.setHeader("x-session-id", newSessionId);
+        res.setHeader("Mcp-Session-Id", newSessionId);
+
+        console.log("📡 [MCP] Setting session headers", {
+          sessionId: newSessionId,
+          headersSent: res.headersSent,
+          timestamp: new Date().toISOString()
+        });
+
+        // Let the transport handle the request
         await transport.handleRequest(req, res);
 
-        // WORKAROUND: Manually set session headers since StreamableHTTPServerTransport isn't doing it
-        if (!res.headersSent) {
-          res.setHeader("mcp-session-id", newSessionId);
-          res.setHeader("x-session-id", newSessionId);
-          res.setHeader("Mcp-Session-Id", newSessionId);
-        }
+        console.log("📡 [MCP] After transport handling", {
+          sessionId: newSessionId,
+          headersSent: res.headersSent,
+          timestamp: new Date().toISOString()
+        });
 
       } else {
         // Handle invalid requests
