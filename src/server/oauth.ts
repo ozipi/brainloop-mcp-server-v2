@@ -420,16 +420,17 @@ export class OAuthProvider {
         this.AUTHORIZATION_CODE_TIMEOUT_MS,
       );
 
-      // Redirect to Reddit OAuth
-      const redditOAuthUrl = new URL("https://www.reddit.com/api/v1/authorize");
-      redditOAuthUrl.searchParams.set("client_id", this.config.GOOGLE_CLIENT_ID);
-      redditOAuthUrl.searchParams.set("response_type", "code");
-      redditOAuthUrl.searchParams.set("state", `${authKey}:${redditState}`);
-      redditOAuthUrl.searchParams.set("redirect_uri", this.config.REDIRECT_URL);
-      redditOAuthUrl.searchParams.set("duration", "permanent");
-      redditOAuthUrl.searchParams.set("scope", "identity read submit privatemessages");
+      // Redirect to Google OAuth
+      const googleOAuthUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+      googleOAuthUrl.searchParams.set("client_id", this.config.GOOGLE_CLIENT_ID);
+      googleOAuthUrl.searchParams.set("response_type", "code");
+      googleOAuthUrl.searchParams.set("state", `${authKey}:${redditState}`);
+      googleOAuthUrl.searchParams.set("redirect_uri", this.config.REDIRECT_URL);
+      googleOAuthUrl.searchParams.set("scope", "openid profile email");
+      googleOAuthUrl.searchParams.set("access_type", "offline");
+      googleOAuthUrl.searchParams.set("prompt", "consent");
 
-      res.redirect(redditOAuthUrl.toString());
+      res.redirect(googleOAuthUrl.toString());
     });
 
     /**
@@ -592,26 +593,26 @@ export class OAuthProvider {
           return;
         }
 
-        // Exchange Reddit code for tokens
-        const redditTokens = await this.exchangeRedditCode(
+        // Exchange Google code for tokens
+        const googleTokens = await this.exchangeGoogleCode(
           code as string,
           this.config.REDIRECT_URL,
         );
 
-        // Get user info from Reddit
-        const userResponse = await fetch("https://oauth.reddit.com/api/v1/me", {
+        // Get user info from Google
+        const userResponse = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
           headers: {
-            Authorization: `Bearer ${redditTokens.access_token}`,
+            Authorization: `Bearer ${googleTokens.access_token}`,
             "User-Agent": "brainloop-mcp-server/2.0.0",
           },
         });
 
         if (!userResponse.ok) {
-          throw new Error("Failed to get user info from Reddit");
+          throw new Error("Failed to get user info from Google");
         }
 
-        const userInfo = (await userResponse.json()) as { name: string };
-        const userId = userInfo.name;
+        const userInfo = (await userResponse.json()) as { email: string; name: string };
+        const userId = userInfo.email;
 
         // Generate authorization code
         const authorizationCode = randomBytes(32).toString("hex");
@@ -621,8 +622,8 @@ export class OAuthProvider {
           codeChallenge: pendingAuth.codeChallenge,
           userId,
           redditTokens: {
-            accessToken: redditTokens.access_token,
-            refreshToken: redditTokens.refresh_token,
+            accessToken: googleTokens.access_token,
+            refreshToken: googleTokens.refresh_token,
           },
           expiresAt: Date.now() + this.AUTHORIZATION_CODE_TIMEOUT_MS,
         });
@@ -699,15 +700,10 @@ export class OAuthProvider {
    * @param actualCallbackUri - Redirect URI used in initial request
    * @returns Reddit token response with access_token and refresh_token
    */
-  private async exchangeRedditCode(code: string, actualCallbackUri: string): Promise<any> {
-    const auth = Buffer.from(
-      `${this.config.GOOGLE_CLIENT_ID}:${this.config.GOOGLE_CLIENT_SECRET}`,
-    ).toString("base64");
-
-    const response = await fetch("https://www.reddit.com/api/v1/access_token", {
+  private async exchangeGoogleCode(code: string, actualCallbackUri: string): Promise<any> {
+    const response = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: {
-        Authorization: `Basic ${auth}`,
         "Content-Type": "application/x-www-form-urlencoded",
         "User-Agent": "brainloop-mcp-server/2.0.0",
       },
@@ -715,6 +711,8 @@ export class OAuthProvider {
         grant_type: "authorization_code",
         code: code,
         redirect_uri: actualCallbackUri,
+        client_id: this.config.GOOGLE_CLIENT_ID,
+        client_secret: this.config.GOOGLE_CLIENT_SECRET,
       }),
     });
 
