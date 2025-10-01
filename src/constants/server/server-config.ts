@@ -30,40 +30,37 @@ import type { Implementation, ServerCapabilities } from "@modelcontextprotocol/s
  * - Real-world API integration (Reddit)
  */
 export const serverConfig: Implementation = {
-  name: "systemprompt-mcp-server-full",
-  version: "1.0.0",
+  name: "brainloop-mcp-server",
+  version: "2.0.0",
   metadata: {
-    name: "SystemPrompt MCP Server Full Example",
+    name: "BRAINLOOP MCP Server",
     description:
-      "Complete example MCP server implementation demonstrating full specification support with type safety. " +
-      "Shows OAuth 2.1, tools, prompts, resources, sampling, and notifications using Reddit as a real-world integration. " +
-      "Perfect template for building your own type-safe MCP servers.",
-    icon: "logos:reddit-icon",
-    color: "orange",
+      "BRAINLOOP MCP server for personalized learning data access. " +
+      "Provides batch operations for courses, units, lessons, and progress tracking. " +
+      "Built with OAuth 2.1 authentication and production-ready architecture.",
+    icon: "brain",
+    color: "blue",
     serverStartTime: Date.now(),
     environment: process.env.NODE_ENV || "production",
     customData: {
-      serverType: "example-implementation",
+      serverType: "brainloop-production",
       implementationFeatures: [
-        "full-mcp-spec",
-        "type-safe",
+        "batch-operations",
+        "course-management",
+        "lesson-creation",
+        "progress-tracking",
         "oauth-2.1",
-        "sampling",
-        "elicitation", 
-        "structured-data",
-        "notifications",
-        "session-management"
+        "type-safe",
+        "production-ready"
       ],
-      exampleIntegration: "reddit-api",
-      templateUsage: "Fork this repository as a starting point for your own MCP server",
-      redditScopes: [
-        "identity",
-        "read",
-        "submit",
-        "edit",
-        "privatemessages",
-        "history",
-        "mysubreddits",
+      integration: "brainloop-api",
+      supportedOperations: [
+        "create-course-batch",
+        "create-unit-batch",
+        "create-lesson-batch",
+        "get-my-courses",
+        "search-lessons",
+        "get-progress"
       ],
     },
   },

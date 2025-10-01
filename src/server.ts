@@ -76,6 +76,16 @@ export async function createApp(): Promise<express.Application> {
   
   app.use(cookieParser());
 
+  // General request logging
+  app.use((req, _res, next) => {
+    console.log(`🌐 [REQUEST] ${req.method} ${req.path}`, {
+      ip: req.ip,
+      userAgent: req.headers['user-agent']?.substring(0, 50) + "...",
+      timestamp: new Date().toISOString()
+    });
+    next();
+  });
+
   // Selective body parsing - skip for MCP streaming endpoints
   app.use((req, res, next) => {
     if (req.path === '/mcp') {
@@ -101,7 +111,12 @@ export async function createApp(): Promise<express.Application> {
  */
 function setupUtilityRoutes(app: express.Application): void {
   // Health check
-  app.get('/health', (_, res) => {
+  app.get('/health', (req, res) => {
+    console.log("❤️ [HEALTH] Health check requested", {
+      ip: req.ip,
+      userAgent: req.headers['user-agent'],
+      timestamp: new Date().toISOString()
+    });
     res.json({
       status: 'ok',
       service: 'reddit-mcp-server',
