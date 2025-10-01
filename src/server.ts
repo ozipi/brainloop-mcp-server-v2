@@ -98,10 +98,10 @@ export async function createApp(): Promise<express.Application> {
     }
   });
 
-  // Set up routes
+  // Set up routes in correct order (specific routes before catch-all)
+  setupUtilityRoutes(app);
   oauthProvider.setupRoutes(app);
   await mcpHandler.setupRoutes(app, oauthProvider.authMiddleware());
-  setupUtilityRoutes(app);
 
   return app;
 }

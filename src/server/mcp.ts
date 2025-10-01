@@ -170,7 +170,10 @@ export class MCPHandler implements IMCPHandler {
       requestSizeLimit(10 * 1024 * 1024), // 10MB max
     ];
 
-    // Main MCP endpoint
+    // Main MCP endpoints - both root and /mcp for compatibility
+    app.all("/", ...mcpMiddleware, (req, res) =>
+      this.handleRequest(req as AuthenticatedRequest, res),
+    );
     app.all("/mcp", ...mcpMiddleware, (req, res) =>
       this.handleRequest(req as AuthenticatedRequest, res),
     );
