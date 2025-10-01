@@ -8,16 +8,16 @@
  * object that is used throughout the application.
  *
  * Required environment variables:
- * - REDDIT_CLIENT_ID: OAuth2 client ID from Reddit app
- * - REDDIT_CLIENT_SECRET: OAuth2 client secret
+ * - GOOGLE_CLIENT_ID: OAuth2 client ID from Google app
+ * - GOOGLE_CLIENT_SECRET: OAuth2 client secret
  * - JWT_SECRET: Secret key for signing JWT tokens
+ * - BRAINLOOP_API_URL: BRAINLOOP API base URL
+ * - BRAINLOOP_DATABASE_URL: BRAINLOOP database connection URL
  *
  * Optional environment variables:
  * - OAUTH_ISSUER: Base URL for OAuth endpoints
  * - REDIRECT_URL: OAuth callback URL
  * - PORT: Server port (default: 3000)
- * - REDDIT_USER_AGENT: User agent for Reddit API
- * - REDDIT_USERNAME: Default Reddit username
  */
 
 import dotenv from "dotenv";
@@ -31,22 +31,22 @@ dotenv.config();
  * These values are typically loaded from environment variables.
  */
 export interface ServerConfig {
-  /** Reddit OAuth2 client ID */
-  REDDIT_CLIENT_ID: string;
-  /** Reddit OAuth2 client secret */
-  REDDIT_CLIENT_SECRET: string;
+  /** Google OAuth2 client ID */
+  GOOGLE_CLIENT_ID: string;
+  /** Google OAuth2 client secret */
+  GOOGLE_CLIENT_SECRET: string;
   /** Secret key for JWT token signing */
   JWT_SECRET: string;
+  /** BRAINLOOP API base URL */
+  BRAINLOOP_API_URL: string;
+  /** BRAINLOOP database connection URL */
+  BRAINLOOP_DATABASE_URL: string;
   /** Base URL for OAuth issuer (production or localhost) */
   OAUTH_ISSUER: string;
   /** OAuth callback redirect URL */
   REDIRECT_URL: string;
   /** Server port number */
   PORT: string;
-  /** User agent string for Reddit API requests */
-  REDDIT_USER_AGENT: string;
-  /** Default Reddit username */
-  REDDIT_USERNAME: string;
 }
 
 /**
@@ -58,37 +58,20 @@ export interface ServerConfig {
  * In development, it defaults to localhost:3000.
  */
 export const CONFIG: ServerConfig = {
-  REDDIT_CLIENT_ID: process.env.REDDIT_CLIENT_ID!,
-  REDDIT_CLIENT_SECRET: process.env.REDDIT_CLIENT_SECRET!,
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID!,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET!,
   JWT_SECRET: process.env.JWT_SECRET!,
+  BRAINLOOP_API_URL: process.env.BRAINLOOP_API_URL!,
+  BRAINLOOP_DATABASE_URL: process.env.BRAINLOOP_DATABASE_URL!,
   OAUTH_ISSUER:
     process.env.OAUTH_ISSUER ||
     (process.env.NODE_ENV === "production"
-      ? "https://systemprompt-mcp-reddit.example.com"
+      ? "https://mcp.brainloop.cc"
       : `http://localhost:${process.env.PORT || "3000"}`),
   REDIRECT_URL:
     process.env.REDIRECT_URL ||
-    `${process.env.OAUTH_ISSUER || `http://localhost:${process.env.PORT || "3000"}`}/oauth/reddit/callback`,
+    `${process.env.OAUTH_ISSUER || `http://localhost:${process.env.PORT || "3000"}`}/oauth/google/callback`,
   PORT: process.env.PORT || "3000",
-  /**
-   * Reddit API User-Agent string identifying your application
-   * @remarks
-   * Reddit requires a specific format: <platform>:<app_id>:<version> (by /u/<developer_username>)
-   * This identifies your APPLICATION to Reddit's servers for rate limiting and compliance.
-   * The username should be the developer's Reddit account, not end users.
-   * @example 'linux:my-reddit-app:v1.0.0 (by /u/my_developer_account)'
-   * @see {@link https://github.com/reddit-archive/reddit/wiki/API} Reddit API Rules
-   */
-  REDDIT_USER_AGENT: process.env.REDDIT_USER_AGENT || "linux:systemprompt-mcp-reddit:v2.0.0",
-  /**
-   * Reddit username of the developer who registered the OAuth app
-   * @remarks
-   * This is YOUR (the developer's) Reddit username, used to construct the User-Agent.
-   * It should match the account that created the Reddit OAuth app.
-   * Do NOT use end user usernames here - those come from OAuth tokens.
-   * @example 'my_developer_account' (without the /u/ prefix)
-   */
-  REDDIT_USERNAME: process.env.REDDIT_USERNAME || "reddit-user",
 } as const;
 
 /**
@@ -97,9 +80,11 @@ export const CONFIG: ServerConfig = {
  * @internal
  */
 const requiredEnvVars: (keyof ServerConfig)[] = [
-  "REDDIT_CLIENT_ID",
-  "REDDIT_CLIENT_SECRET",
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
   "JWT_SECRET",
+  "BRAINLOOP_API_URL",
+  "BRAINLOOP_DATABASE_URL",
 ];
 for (const envVar of requiredEnvVars) {
   if (!CONFIG[envVar]) {
@@ -122,9 +107,9 @@ for (const envVar of requiredEnvVars) {
  * Any OAuth callback must match one of these URIs exactly.
  */
 export const VALID_REDIRECT_URIS = [
-  `http://localhost:${CONFIG.PORT}/oauth/reddit/callback`,
-  "http://localhost:5173/oauth/reddit/callback",
+  `http://localhost:${CONFIG.PORT}/oauth/google/callback`,
+  "http://localhost:5173/oauth/google/callback",
   "http://localhost:6274/oauth/callback/debug",
-  `${CONFIG.OAUTH_ISSUER}/oauth/reddit/callback`,
+  `${CONFIG.OAUTH_ISSUER}/oauth/google/callback`,
   CONFIG.REDIRECT_URL,
 ];
