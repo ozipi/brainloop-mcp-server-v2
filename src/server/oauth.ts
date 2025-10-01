@@ -422,7 +422,7 @@ export class OAuthProvider {
 
       // Redirect to Reddit OAuth
       const redditOAuthUrl = new URL("https://www.reddit.com/api/v1/authorize");
-      redditOAuthUrl.searchParams.set("client_id", this.config.REDDIT_CLIENT_ID);
+      redditOAuthUrl.searchParams.set("client_id", this.config.GOOGLE_CLIENT_ID);
       redditOAuthUrl.searchParams.set("response_type", "code");
       redditOAuthUrl.searchParams.set("state", `${authKey}:${redditState}`);
       redditOAuthUrl.searchParams.set("redirect_uri", this.config.REDIRECT_URL);
@@ -602,7 +602,7 @@ export class OAuthProvider {
         const userResponse = await fetch("https://oauth.reddit.com/api/v1/me", {
           headers: {
             Authorization: `Bearer ${redditTokens.access_token}`,
-            "User-Agent": this.config.REDDIT_USER_AGENT,
+            "User-Agent": "brainloop-mcp-server/2.0.0",
           },
         });
 
@@ -701,7 +701,7 @@ export class OAuthProvider {
    */
   private async exchangeRedditCode(code: string, actualCallbackUri: string): Promise<any> {
     const auth = Buffer.from(
-      `${this.config.REDDIT_CLIENT_ID}:${this.config.REDDIT_CLIENT_SECRET}`,
+      `${this.config.GOOGLE_CLIENT_ID}:${this.config.GOOGLE_CLIENT_SECRET}`,
     ).toString("base64");
 
     const response = await fetch("https://www.reddit.com/api/v1/access_token", {
@@ -709,7 +709,7 @@ export class OAuthProvider {
       headers: {
         Authorization: `Basic ${auth}`,
         "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": this.config.REDDIT_USER_AGENT,
+        "User-Agent": "brainloop-mcp-server/2.0.0",
       },
       body: new URLSearchParams({
         grant_type: "authorization_code",
