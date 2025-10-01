@@ -262,6 +262,13 @@ export class MCPHandler implements IMCPHandler {
         // Let the transport handle the request and session headers automatically
         await transport.handleRequest(req, res);
 
+        // WORKAROUND: Manually set session headers since StreamableHTTPServerTransport isn't doing it
+        if (!res.headersSent) {
+          res.setHeader("mcp-session-id", newSessionId);
+          res.setHeader("x-session-id", newSessionId);
+          res.setHeader("Mcp-Session-Id", newSessionId);
+        }
+
       } else {
         // Handle invalid requests
         const errorMessage = sessionId ? "Session not found" : "Missing session ID or not initialization request";
