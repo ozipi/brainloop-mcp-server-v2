@@ -182,6 +182,19 @@ export class MCPHandler implements IMCPHandler {
   private async handleRequest(req: AuthenticatedRequest, res: express.Response): Promise<void> {
     const startTime = Date.now();
 
+    console.log("📡 [MCP] Request received", {
+      method: req.method,
+      url: req.url,
+      hasAuth: !!req.auth,
+      userId: req.auth?.extra?.userId,
+      headers: {
+        'mcp-session-id': req.headers['mcp-session-id'],
+        'x-session-id': req.headers['x-session-id'],
+        'authorization': req.headers['authorization'] ? 'Bearer ***' : 'none'
+      },
+      timestamp: new Date().toISOString()
+    });
+
     try {
       res.header("Access-Control-Expose-Headers", "mcp-session-id, x-session-id");
       let sessionId =
@@ -218,6 +231,14 @@ export class MCPHandler implements IMCPHandler {
         };
         this.sessions.set(sessionId, sessionInfo);
         logger.debug(`📝 Created new session with dedicated server: ${sessionId}`);
+
+        console.log("📡 [MCP] New session created", {
+          sessionId,
+          hasAuth: !!sessionAuth,
+          userId: sessionAuth?.username,
+          timestamp: new Date().toISOString()
+        });
+
         await transport.handleRequest(req, res);
       } else {
         // Find existing session
