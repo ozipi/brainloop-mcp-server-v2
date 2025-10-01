@@ -237,6 +237,10 @@ export class MCPHandler implements IMCPHandler {
         this.sessions.set(sessionId, sessionInfo);
         logger.debug(`📝 Created new session with dedicated server: ${sessionId}`);
 
+        // Explicitly set session ID headers for Claude
+        res.setHeader("mcp-session-id", sessionId);
+        res.setHeader("x-session-id", sessionId);
+
         console.log("📡 [MCP] New session created", {
           sessionId,
           hasAuth: !!sessionAuth,
