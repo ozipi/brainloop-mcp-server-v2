@@ -488,8 +488,20 @@ export class OAuthProvider {
           }
 
           // Generate tokens
+          console.log("🔐 [OAUTH] Generating JWT tokens", {
+            userId: authCode.userId,
+            clientId: authCode.clientId,
+            timestamp: new Date().toISOString()
+          });
+
           const refreshTokenId = randomBytes(32).toString("hex");
           const accessToken = await this.createAccessToken(authCode.userId, authCode.redditTokens);
+
+          console.log("🔐 [OAUTH] JWT tokens generated successfully", {
+            refreshTokenId: refreshTokenId.substring(0, 16) + "...",
+            hasAccessToken: !!accessToken,
+            timestamp: new Date().toISOString()
+          });
 
           this.refreshTokens.set(refreshTokenId, {
             userId: authCode.userId,
@@ -499,6 +511,15 @@ export class OAuthProvider {
           });
 
           this.authorizationCodes.delete(code);
+
+          console.log("🔐 [OAUTH] Sending JWT token response to client", {
+            hasAccessToken: !!accessToken,
+            tokenType: "Bearer",
+            expiresIn: 86400,
+            hasRefreshToken: !!refreshTokenId,
+            scope: "read",
+            timestamp: new Date().toISOString()
+          });
 
           res.json({
             access_token: accessToken,
