@@ -1,6 +1,6 @@
 {
   "name": "brainloop-mcp-server",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "BRAINLOOP MCP server with OAuth 2.1 authentication for personalized learning data access. Built on proven MCP implementation with TypeScript and production-ready architecture.",
   "type": "module",
   "exports": {

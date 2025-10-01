@@ -201,7 +201,7 @@ export class MCPHandler implements IMCPHandler {
     });
 
     try {
-      res.header("Access-Control-Expose-Headers", "mcp-session-id, x-session-id");
+      res.header("Access-Control-Expose-Headers", "mcp-session-id, x-session-id, Content-Type, Authorization");
       let sessionId =
         (req.headers["mcp-session-id"] as string) || (req.headers["x-session-id"] as string);
       const isInitRequest = !sessionId;
@@ -237,10 +237,6 @@ export class MCPHandler implements IMCPHandler {
         this.sessions.set(sessionId, sessionInfo);
         logger.debug(`📝 Created new session with dedicated server: ${sessionId}`);
 
-        // Explicitly set session ID headers for Claude
-        res.setHeader("mcp-session-id", sessionId);
-        res.setHeader("x-session-id", sessionId);
-
         console.log("📡 [MCP] New session created", {
           sessionId,
           hasAuth: !!sessionAuth,
@@ -248,7 +244,17 @@ export class MCPHandler implements IMCPHandler {
           timestamp: new Date().toISOString()
         });
 
+        // Set session ID headers before transport handles request
+        res.setHeader("mcp-session-id", sessionId);
+        res.setHeader("x-session-id", sessionId);
+
         await transport.handleRequest(req, res);
+
+        // Ensure session headers are set after transport handling
+        if (!res.headersSent) {
+          res.setHeader("mcp-session-id", sessionId);
+          res.setHeader("x-session-id", sessionId);
+        }
 
         console.log("📡 [MCP] Session request handled", {
           sessionId,
@@ -297,6 +303,10 @@ export class MCPHandler implements IMCPHandler {
           await newServer.connect(sessionInfo.transport);
           sessionInfo.server = newServer;
         }
+
+        // Set session headers for existing sessions too
+        res.setHeader("mcp-session-id", sessionId);
+        res.setHeader("x-session-id", sessionId);
 
         // Let the session's transport handle the request
         await sessionInfo.transport.handleRequest(req, res);
