@@ -557,11 +557,11 @@ export class OAuthProvider {
      * MCP OAuth Step 6: Reddit OAuth Callback
      * @see https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization#callback
      *
-     * Receives callback from Reddit after user authorization.
-     * Exchanges Reddit code for tokens, generates MCP authorization
+     * Receives callback from Google after user authorization.
+     * Exchanges Google code for tokens, generates MCP authorization
      * code, and redirects back to client with code.
      */
-    app.get("/oauth/reddit/callback", async (req, res) => {
+    app.get("/oauth/google/callback", async (req, res) => {
       const { code, state, error } = req.query;
 
       if (error) {
