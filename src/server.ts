@@ -162,9 +162,13 @@ function setupUtilityRoutes(app: express.Application): void {
 export async function startServer(port?: number): Promise<ReturnType<express.Application['listen']>> {
   const app = await createApp();
   const serverPort = port || parseInt(CONFIG.PORT, 10);
-  
+
+  // Import package.json to get current version
+  const packageJson = await import('../package.json', { with: { type: 'json' } });
+  const version = packageJson.default.version;
+
   return app.listen(serverPort, '0.0.0.0', () => {
-    console.log(`🚀 BRAINLOOP MCP Server v2.0.0 running on port ${serverPort}`);
+    console.log(`🚀 BRAINLOOP MCP Server v${version} running on port ${serverPort}`);
     console.log(`🔐 OAuth authorize: ${CONFIG.OAUTH_ISSUER}/oauth/authorize`);
     console.log(`📡 MCP endpoint: ${CONFIG.OAUTH_ISSUER}/mcp`);
     console.log(`❤️  Health: ${CONFIG.OAUTH_ISSUER}/health`);

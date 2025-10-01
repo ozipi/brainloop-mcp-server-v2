@@ -171,7 +171,7 @@ export class MCPHandler implements IMCPHandler {
     ];
 
     // SSE endpoint for Claude MCP client compatibility
-    app.get("/", (req, res, next) => {
+    app.get("/", async (req, res, next) => {
       const acceptHeader = req.headers.accept || '';
 
       // Check if Claude is requesting SSE connection
@@ -191,9 +191,13 @@ export class MCPHandler implements IMCPHandler {
           'Access-Control-Allow-Headers': 'Cache-Control'
         });
 
+        // Get dynamic version from package.json
+        const packageJson = await import('../../package.json', { with: { type: 'json' } });
+        const version = packageJson.default.version;
+
         // Send initial connection success
         res.write('event: connected\\n');
-        res.write(`data: {"status": "connected", "server": "BRAINLOOP MCP Server v2.0.0"}\\n\\n`);
+        res.write(`data: {"status": "connected", "server": "BRAINLOOP MCP Server v${version}"}\\n\\n`);
 
         console.log("📡 [MCP] SSE connection established", {
           timestamp: new Date().toISOString()
