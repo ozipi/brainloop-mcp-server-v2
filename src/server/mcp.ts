@@ -243,6 +243,12 @@ export class MCPHandler implements IMCPHandler {
         });
 
         await transport.handleRequest(req, res);
+
+        console.log("📡 [MCP] Session request handled", {
+          sessionId,
+          method: req.method,
+          timestamp: new Date().toISOString()
+        });
       } else {
         // Find existing session
         if (!sessionId) {
@@ -288,10 +294,25 @@ export class MCPHandler implements IMCPHandler {
 
         // Let the session's transport handle the request
         await sessionInfo.transport.handleRequest(req, res);
+
+        console.log("📡 [MCP] Existing session request handled", {
+          sessionId,
+          method: req.method,
+          timestamp: new Date().toISOString()
+        });
       }
 
       logger.debug(`MCP request completed in ${Date.now() - startTime}ms for session ${sessionId}`);
     } catch (error) {
+      console.error("📡 [MCP] Request failed", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        method: req.method,
+        url: req.url,
+        duration: Date.now() - startTime,
+        timestamp: new Date().toISOString()
+      });
+
       logger.error("MCP request failed", {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
