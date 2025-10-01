@@ -170,59 +170,8 @@ export class MCPHandler implements IMCPHandler {
       requestSizeLimit(10 * 1024 * 1024), // 10MB max
     ];
 
-    // SSE endpoint for Claude MCP client compatibility
-    app.get("/", async (req, res, next) => {
-      const acceptHeader = req.headers.accept || '';
-
-      // Check if Claude is requesting SSE connection
-      if (acceptHeader.includes('text/event-stream')) {
-        console.log("📡 [MCP] SSE connection requested", {
-          accept: acceptHeader,
-          userAgent: req.headers['user-agent'],
-          timestamp: new Date().toISOString()
-        });
-
-        // Set up Server-Sent Events for Claude MCP client
-        res.writeHead(200, {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'Cache-Control'
-        });
-
-        // Get dynamic version from package.json
-        const packageJson = await import('../../package.json', { with: { type: 'json' } });
-        const version = packageJson.default.version;
-
-        // Send initial connection success
-        res.write('event: connected\\n');
-        res.write(`data: {"status": "connected", "server": "BRAINLOOP MCP Server v${version}"}\\n\\n`);
-
-        console.log("📡 [MCP] SSE connection established", {
-          timestamp: new Date().toISOString()
-        });
-
-        // Keep connection alive with periodic heartbeat
-        const heartbeat = setInterval(() => {
-          res.write('event: heartbeat\\n');
-          res.write(`data: {"timestamp": "${new Date().toISOString()}"}\\n\\n`);
-        }, 30000);
-
-        // Clean up on connection close
-        req.on('close', () => {
-          clearInterval(heartbeat);
-          console.log("📡 [MCP] SSE connection closed", {
-            timestamp: new Date().toISOString()
-          });
-        });
-
-        return; // Important: Don't call next()
-      }
-
-      // Continue to normal MCP handling for non-SSE requests
-      next();
-    }, ...mcpMiddleware, (req, res) =>
+    // MCP endpoint with full middleware stack
+    app.all("/", ...mcpMiddleware, (req, res) =>
       this.handleRequest(req as AuthenticatedRequest, res),
     );
 

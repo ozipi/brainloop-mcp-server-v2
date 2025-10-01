@@ -98,9 +98,9 @@ export async function createApp(): Promise<express.Application> {
     }
   });
 
-  // Set up routes in correct order (specific routes before catch-all)
-  setupUtilityRoutes(app);
+  // Set up routes in correct order (OAuth and utility routes first, then MCP gets root)
   oauthProvider.setupRoutes(app);
+  setupUtilityRoutes(app);
   await mcpHandler.setupRoutes(app, oauthProvider.authMiddleware());
 
   return app;
@@ -128,15 +128,8 @@ function setupUtilityRoutes(app: express.Application): void {
     });
   });
 
-  // Root endpoint with service metadata (skip SSE requests - let MCP handler handle those)
-  app.get('/', async (req, res, next) => {
-    const acceptHeader = req.headers.accept || '';
-
-    // If Claude is requesting SSE, skip to next handler (MCP)
-    if (acceptHeader.includes('text/event-stream')) {
-      return next();
-    }
-
+  // Metadata endpoint at /metadata path
+  app.get('/metadata', async (req, res) => {
     const protocol =
       req.get('x-forwarded-proto') ||
       (req.get('host')?.includes('systemprompt.io') ? 'https' : req.protocol);
@@ -157,7 +150,7 @@ function setupUtilityRoutes(app: express.Application): void {
           token: `${baseUrl}${basePath}/oauth/token`,
           metadata: `${baseUrl}/.well-known/oauth-authorization-server`,
         },
-        mcp: `${baseUrl}${basePath}/mcp`,
+        mcp: `${baseUrl}${basePath}/`,
         health: `${baseUrl}${basePath}/health`,
       },
     });
