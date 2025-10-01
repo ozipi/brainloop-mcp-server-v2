@@ -137,7 +137,7 @@ function setupUtilityRoutes(app: express.Application): void {
     const basePath = req.baseUrl || '';
     
     res.json({
-      service: 'Reddit MCP Server',
+      service: 'BRAINLOOP MCP Server',
       version: '1.0.0',
       transport: 'http',
       endpoints: {
@@ -164,7 +164,7 @@ export async function startServer(port?: number): Promise<ReturnType<express.App
   const serverPort = port || parseInt(CONFIG.PORT, 10);
   
   return app.listen(serverPort, '0.0.0.0', () => {
-    console.log(`🚀 Reddit MCP Server running on port ${serverPort}`);
+    console.log(`🚀 BRAINLOOP MCP Server v2.0.0 running on port ${serverPort}`);
     console.log(`🔐 OAuth authorize: ${CONFIG.OAUTH_ISSUER}/oauth/authorize`);
     console.log(`📡 MCP endpoint: ${CONFIG.OAUTH_ISSUER}/mcp`);
     console.log(`❤️  Health: ${CONFIG.OAUTH_ISSUER}/health`);
