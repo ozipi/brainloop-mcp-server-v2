@@ -128,17 +128,28 @@ function setupUtilityRoutes(app: express.Application): void {
     });
   });
 
-  // Root endpoint with service metadata
-  app.get('/', (req, res) => {
+  // Root endpoint with service metadata (skip SSE requests - let MCP handler handle those)
+  app.get('/', async (req, res, next) => {
+    const acceptHeader = req.headers.accept || '';
+
+    // If Claude is requesting SSE, skip to next handler (MCP)
+    if (acceptHeader.includes('text/event-stream')) {
+      return next();
+    }
+
     const protocol =
       req.get('x-forwarded-proto') ||
       (req.get('host')?.includes('systemprompt.io') ? 'https' : req.protocol);
     const baseUrl = `${protocol}://${req.get('host')}`;
     const basePath = req.baseUrl || '';
-    
+
+    // Get dynamic version from package.json
+    const packageJson = await import('../package.json', { with: { type: 'json' } });
+    const version = packageJson.default.version;
+
     res.json({
       service: 'BRAINLOOP MCP Server',
-      version: '1.0.0',
+      version: version,
       transport: 'http',
       endpoints: {
         oauth: {
