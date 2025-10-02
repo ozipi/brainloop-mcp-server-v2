@@ -227,9 +227,9 @@ export class MCPHandler implements IMCPHandler {
 
         // Extract auth info if available
         // Use the Google access token from req.auth.extra instead of the wrapper JWT
-        const sessionAuth = req.auth?.extra?.redditAccessToken ? {
-          accessToken: String(req.auth.extra.redditAccessToken),
-          refreshToken: String(req.auth.extra?.redditRefreshToken || ""),
+        const sessionAuth = req.auth?.extra?.googleAccessToken ? {
+          accessToken: String(req.auth.extra.googleAccessToken),
+          refreshToken: String(req.auth.extra?.googleRefreshToken || ""),
           username: String(req.auth.extra?.userId || "unknown"),
         } : undefined;
 

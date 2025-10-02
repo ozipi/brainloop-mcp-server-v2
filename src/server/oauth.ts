@@ -28,7 +28,7 @@ interface PendingAuthorization {
   codeChallengeMethod: string;
   state: string;
   scope: string;
-  redditState: string;
+  googleState: string;
 }
 
 interface AuthorizationCode {
@@ -36,19 +36,19 @@ interface AuthorizationCode {
   redirectUri: string;
   codeChallenge: string;
   userId: string;
-  redditTokens: { accessToken: string; refreshToken: string };
+  googleTokens: { accessToken: string; refreshToken: string };
   expiresAt: number;
 }
 
 interface RefreshTokenData {
   userId: string;
   clientId: string;
-  redditTokens: { accessToken: string; refreshToken: string };
+  googleTokens: { accessToken: string; refreshToken: string };
   expiresAt: number;
 }
 
 /**
- * OAuth 2.1 Provider for MCP Reddit Server
+ * OAuth 2.1 Provider for MCP BRAINLOOP Server
  *
  * @remarks
  * Implements the complete MCP OAuth 2.1 flow with PKCE
@@ -60,13 +60,13 @@ interface RefreshTokenData {
  * - Step 3: Authorization server metadata
  * - Step 4: Dynamic client registration
  * - Step 5: Authorization with PKCE
- * - Step 6: Reddit OAuth callback
+ * - Step 6: Google OAuth callback
  * - Step 7: Token exchange
  * - Step 8: Authenticated requests
  *
  * Security features:
  * - PKCE (RFC 7636) for authorization code flow
- * - JWT tokens with Reddit credentials
+ * - JWT tokens with Google credentials
  * - Secure state parameter validation
  * - Time-limited authorization codes
  */
@@ -86,23 +86,23 @@ export class OAuthProvider {
   }
 
   /**
-   * Verifies JWT access token and extracts Reddit credentials
+   * Verifies JWT access token and extracts Google credentials
    *
    * @remarks
    * MCP OAuth Step 8: Authenticated MCP Request
    * @see https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization#authenticated-requests
    *
    * Validates JWT signature and expiration.
-   * Extracts Reddit access/refresh tokens for API calls.
+   * Extracts Google access/refresh tokens for API calls.
    *
    * @param token - JWT access token from Authorization header
    * @param req - Express request object (optional)
-   * @returns AuthInfo with user details and Reddit tokens
+   * @returns AuthInfo with user details and Google tokens
    */
   async verifyAccessToken(token: string, _req?: express.Request): Promise<AuthInfo> {
     try {
       const { payload } = await jwtVerify(token, this.jwtSecret, {
-        audience: "reddit-mcp-server",
+        audience: "brainloop-mcp-server",
         issuer: this.config.OAUTH_ISSUER,
       });
 
@@ -113,8 +113,8 @@ export class OAuthProvider {
         expiresAt: payload.exp,
         extra: {
           userId: payload.sub,
-          redditAccessToken: payload.reddit_access_token,
-          redditRefreshToken: payload.reddit_refresh_token,
+          googleAccessToken: payload.google_access_token,
+          googleRefreshToken: payload.google_refresh_token,
         },
       };
     } catch (error) {
@@ -423,8 +423,8 @@ export class OAuthProvider {
         return;
       }
 
-      // Generate Reddit OAuth state and store pending authorization
-      const redditState = randomBytes(32).toString("hex");
+      // Generate Google OAuth state and store pending authorization
+      const googleState = randomBytes(32).toString("hex");
       const authKey = randomBytes(32).toString("hex");
 
       this.pendingAuthorizations.set(authKey, {
@@ -434,7 +434,7 @@ export class OAuthProvider {
         codeChallengeMethod: code_challenge_method as string,
         state: state as string,
         scope: scope as string,
-        redditState,
+        googleState,
       });
 
       // Clean up expired authorizations
@@ -447,7 +447,7 @@ export class OAuthProvider {
       const googleOAuthUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
       googleOAuthUrl.searchParams.set("client_id", this.config.GOOGLE_CLIENT_ID);
       googleOAuthUrl.searchParams.set("response_type", "code");
-      googleOAuthUrl.searchParams.set("state", `${authKey}:${redditState}`);
+      googleOAuthUrl.searchParams.set("state", `${authKey}:${googleState}`);
       googleOAuthUrl.searchParams.set("redirect_uri", this.config.REDIRECT_URL);
       googleOAuthUrl.searchParams.set("scope", "openid profile email");
       googleOAuthUrl.searchParams.set("access_type", "offline");
@@ -518,7 +518,7 @@ export class OAuthProvider {
           });
 
           const refreshTokenId = randomBytes(32).toString("hex");
-          const accessToken = await this.createAccessToken(authCode.userId, authCode.redditTokens);
+          const accessToken = await this.createAccessToken(authCode.userId, authCode.googleTokens);
 
           console.log("🔐 [OAUTH] JWT tokens generated successfully", {
             refreshTokenId: refreshTokenId.substring(0, 16) + "...",
@@ -529,7 +529,7 @@ export class OAuthProvider {
           this.refreshTokens.set(refreshTokenId, {
             userId: authCode.userId,
             clientId: authCode.clientId,
-            redditTokens: authCode.redditTokens,
+            googleTokens: authCode.googleTokens,
             expiresAt: Date.now() + this.REFRESH_TOKEN_TIMEOUT_MS,
           });
 
@@ -547,7 +547,7 @@ export class OAuthProvider {
           res.json({
             access_token: accessToken,
             token_type: "Bearer",
-            expires_in: 86400, // 24 hours to match Reddit token expiry
+            expires_in: 86400, // 24 hours to match Google token expiry
             refresh_token: refreshTokenId,
             scope: "read",
           });
@@ -572,16 +572,16 @@ export class OAuthProvider {
             return;
           }
 
-          // TODO: Refresh Reddit tokens if needed
+          // TODO: Refresh Google tokens if needed
           const accessToken = await this.createAccessToken(
             tokenData.userId,
-            tokenData.redditTokens,
+            tokenData.googleTokens,
           );
 
           res.json({
             access_token: accessToken,
             token_type: "Bearer",
-            expires_in: 86400, // 24 hours to match Reddit token expiry
+            expires_in: 86400, // 24 hours to match Google token expiry
             scope: "read",
           });
           return;
@@ -604,10 +604,10 @@ export class OAuthProvider {
     });
 
     /**
-     * Reddit OAuth Callback Handler
+     * Google OAuth Callback Handler
      *
      * @remarks
-     * MCP OAuth Step 6: Reddit OAuth Callback
+     * MCP OAuth Step 6: Google OAuth Callback
      * @see https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization#callback
      *
      * Receives callback from Google after user authorization.
@@ -648,11 +648,11 @@ export class OAuthProvider {
       }
 
       try {
-        // Parse state to get auth key and Reddit state
-        const [authKey, redditState] = (state as string).split(":");
+        // Parse state to get auth key and Google state
+        const [authKey, googleState] = (state as string).split(":");
         const pendingAuth = this.pendingAuthorizations.get(authKey);
 
-        if (!pendingAuth || pendingAuth.redditState !== redditState) {
+        if (!pendingAuth || pendingAuth.googleState !== googleState) {
           res.status(400).json({
             error: "invalid_request",
             error_description: "Invalid state parameter",
@@ -701,7 +701,7 @@ export class OAuthProvider {
           redirectUri: pendingAuth.redirectUri,
           codeChallenge: pendingAuth.codeChallenge,
           userId,
-          redditTokens: {
+          googleTokens: {
             accessToken: googleTokens.access_token,
             refreshToken: googleTokens.refresh_token,
           },
@@ -736,29 +736,29 @@ export class OAuthProvider {
   }
 
   /**
-   * Creates JWT access token containing Reddit credentials
+   * Creates JWT access token containing Google credentials
    *
    * @remarks
    * Part of MCP OAuth Step 7: Token Exchange
-   * JWT contains Reddit tokens for making API calls
+   * JWT contains Google tokens for making API calls
    *
-   * @param userId - Reddit username
-   * @param redditTokens - Reddit access and refresh tokens
+   * @param userId - User email
+   * @param googleTokens - Google access and refresh tokens
    * @returns Signed JWT token for MCP authentication
    */
   private async createAccessToken(
     userId: string,
-    redditTokens: { accessToken: string; refreshToken: string },
+    googleTokens: { accessToken: string; refreshToken: string },
   ): Promise<string> {
     return await new SignJWT({
       sub: userId,
-      reddit_access_token: redditTokens.accessToken,
-      reddit_refresh_token: redditTokens.refreshToken,
+      google_access_token: googleTokens.accessToken,
+      google_refresh_token: googleTokens.refreshToken,
     })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
-      .setExpirationTime("24h") // 24 hours to match Reddit token expiry
-      .setAudience("reddit-mcp-server")
+      .setExpirationTime("24h") // 24 hours to match Google token expiry
+      .setAudience("brainloop-mcp-server")
       .setIssuer(this.config.OAUTH_ISSUER)
       .sign(this.jwtSecret);
   }
