@@ -156,7 +156,7 @@ export class BrainloopService {
    * Get user's enrolled courses
    */
   async getMyCourses(): Promise<Course[]> {
-    return this.makeRequest<Course[]>('/courses/my-courses');
+    return this.makeRequest<Course[]>('/mcp/courses/my-courses');
   }
 
   /**
