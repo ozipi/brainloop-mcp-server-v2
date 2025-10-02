@@ -19,10 +19,8 @@ import type {
 import { z } from 'zod';
 import { TOOLS, TOOL_ERROR_MESSAGES } from '../constants/tools.js';
 import { BrainloopService } from '../services/brainloop/brainloop-service.js';
-import { RedditService } from '../services/reddit/reddit-service.js';
 import { logger } from '../utils/logger.js';
 import type { RedditAuthInfo, MCPToolContext } from '../types/request-context.js';
-import type { ToolHandlerContext } from './tools/types.js';
 import {
   handleCreateBrainloop,
   handleViewBrainloops,
@@ -30,25 +28,6 @@ import {
   handleExpandBrainloop,
   handleBrainloopProgress,
 } from './tools/brainloop-handlers.js';
-import type {
-  GetChannelArgs,
-  GetPostArgs,
-  GetNotificationsArgs,
-  SearchRedditArgs,
-  GetCommentArgs,
-} from './tools/index.js';
-import {
-  handleGetChannel,
-  handleGetNotifications,
-  handleGetPost,
-  handleSearchReddit,
-  handleGetComment,
-  handleElicitationExample,
-  handleSamplingExample,
-  handleStructuredDataExample,
-  handleLogging,
-  handleValidationExample,
-} from './tools/index.js';
 
 /**
  * Zod schemas for brainloop tool validation
@@ -159,16 +138,11 @@ const ToolSchemas = {
  * to their respective handlers.
  */
 type ToolArgs = {
-  get_channel: GetChannelArgs;
-  get_post: GetPostArgs;
-  get_notifications: GetNotificationsArgs;
-  search_reddit: SearchRedditArgs;
-  get_comment: GetCommentArgs;
-  elicitation_example: any; // Example tools use any for flexibility
-  sampling_example: any;
-  structured_data_example: any;
-  mcp_logging: { level: 'debug' | 'info' | 'warning' | 'error'; message: string; data?: any };
-  validation_example: any;
+  create_brainloop: any;
+  view_brainloops: any;
+  get_brainloop: any;
+  expand_brainloop: any;
+  brainloop_progress: any;
 };
 
 /**
@@ -199,62 +173,47 @@ export async function handleListTools(_request: ListToolsRequest): Promise<ListT
 }
 
 /**
- * Zod schema for validating Reddit credentials from AuthInfo.extra
- */
-const RedditCredentialsSchema = z.object({
-  redditAccessToken: z.string().min(1, "Reddit access token is required"),
-  redditRefreshToken: z.string().min(1, "Reddit refresh token is required"),
-  userId: z.string().min(1, "User ID is required"),
-});
-
-/**
- * Reddit authentication credentials structure.
- * 
+ * BRAINLOOP authentication credentials structure.
+ *
  * @remarks
- * Contains the OAuth tokens and user ID needed to authenticate
- * requests to the Reddit API.
+ * Contains the OAuth token and user ID needed to authenticate
+ * requests to the BRAINLOOP API.
  */
-interface RedditCredentials {
+interface BrainloopCredentials {
   /** OAuth2 access token for API requests */
   accessToken: string;
-  /** OAuth2 refresh token for renewing access */
-  refreshToken: string;
-  /** Reddit user ID */
+  /** User ID */
   userId: string;
 }
 
 /**
- * Extracts and validates Reddit credentials from AuthInfo.
- * 
+ * Extracts and validates BRAINLOOP credentials from AuthInfo.
+ *
  * @remarks
  * This function ensures that all required authentication data
- * is present before attempting to make Reddit API calls.
- * 
+ * is present before attempting to make BRAINLOOP API calls.
+ *
  * @param authInfo - Authentication information from the MCP context
- * @returns Validated Reddit credentials
+ * @returns Validated BRAINLOOP credentials
  * @throws Error if required credentials are missing or invalid
  */
-function extractAndValidateCredentials(authInfo: RedditAuthInfo): RedditCredentials {
-  if (!authInfo.extra) {
-    throw new Error("Authentication failed: Missing auth info");
+function extractAndValidateCredentials(authInfo: RedditAuthInfo): BrainloopCredentials {
+  if (!authInfo.token) {
+    throw new Error("Authentication failed: Missing access token");
   }
 
+  const userId = (authInfo.extra?.userId as string) || 'unknown';
+
   try {
-    const validated = RedditCredentialsSchema.parse(authInfo.extra);
     return {
-      accessToken: validated.redditAccessToken,
-      refreshToken: validated.redditRefreshToken,
-      userId: validated.userId,
+      accessToken: authInfo.token,
+      userId,
     };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      const errorMessages = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
-      logger.error("Reddit credentials validation failed", {
-        errors: error.errors,
-        authInfo: authInfo.extra,
-      });
-      throw new Error(`Authentication failed: ${errorMessages}`);
-    }
+    logger.error("BRAINLOOP credentials validation failed", {
+      error: error instanceof Error ? error.message : String(error),
+      userId,
+    });
     throw error;
   }
 }
@@ -288,22 +247,8 @@ export async function handleToolCall(
   
   try {
     logger.info(`🔧 handleToolCall called for tool: ${request.params.name}`);
-    // Extract and validate Reddit credentials from AuthInfo
+    // Extract and validate BRAINLOOP credentials from AuthInfo
     const credentials = extractAndValidateCredentials(context.authInfo);
-
-    // Create Reddit service with validated tokens
-    const redditService = new RedditService({
-      accessToken: credentials.accessToken,
-      refreshToken: credentials.refreshToken,
-      username: credentials.userId, // Pass the Reddit username from OAuth
-    });
-
-    const handlerContext: ToolHandlerContext = {
-      redditService,
-      userId: credentials.userId,
-      sessionId: context.sessionId,
-      progressToken: request.params._meta?.progressToken,
-    };
 
     if (!request.params.arguments) {
       logger.error("Tool call missing required arguments", { toolName: request.params?.name });
@@ -346,15 +291,14 @@ export async function handleToolCall(
     let result: CallToolResult;
 
     // Create brainloop service for brainloop tools
-    const userId = context.authInfo.extra?.userId || 'unknown';
     const brainloopService = new BrainloopService({
-      accessToken: context.authInfo.token,
-      userId,
+      accessToken: credentials.accessToken,
+      userId: credentials.userId,
     });
 
     const brainloopContext = {
       brainloopService,
-      userId,
+      userId: credentials.userId,
       sessionId: context.sessionId,
     };
 
@@ -373,36 +317,6 @@ export async function handleToolCall(
         break;
       case "brainloop_progress":
         result = await handleBrainloopProgress(args as any, brainloopContext);
-        break;
-      case "get_channel":
-        result = await handleGetChannel(args as GetChannelArgs, handlerContext);
-        break;
-      case "get_post":
-        result = await handleGetPost(args as GetPostArgs, handlerContext);
-        break;
-      case "get_notifications":
-        result = await handleGetNotifications(args as GetNotificationsArgs, handlerContext);
-        break;
-      case "get_comment":
-        result = await handleGetComment(args as GetCommentArgs, handlerContext);
-        break;
-      case "search_reddit":
-        result = await handleSearchReddit(args as SearchRedditArgs, handlerContext);
-        break;
-      case "elicitation_example":
-        result = await handleElicitationExample(args, context);
-        break;
-      case "sampling_example":
-        result = await handleSamplingExample(args, context);
-        break;
-      case "structured_data_example":
-        result = await handleStructuredDataExample(args, context);
-        break;
-      case "mcp_logging":
-        result = await handleLogging(args, handlerContext);
-        break;
-      case "validation_example":
-        result = await handleValidationExample(args, handlerContext);
         break;
       default:
         logger.error("Unsupported tool in switch statement", { toolName: request.params.name });
