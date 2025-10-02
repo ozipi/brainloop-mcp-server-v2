@@ -40,8 +40,7 @@ export async function handleCreateBrainloop(
     const [course] = await context.brainloopService.createCoursesBatch([{
       title: args.title,
       description: args.description,
-      isPublic: args.isPublic ?? false,
-      isPublished: args.isPublished ?? true,
+      isPrivate: !(args.isPublic ?? false),
     }]);
 
     logger.info(`✅ Brainloop created with ID: ${course.id}`);
@@ -174,7 +173,6 @@ export async function handleExpandBrainloop(
         title: unitData.title,
         description: unitData.description,
         order: 999, // Will be reordered by API
-        isPublished: true,
       }]);
 
       // Create lessons for the unit
@@ -184,7 +182,6 @@ export async function handleExpandBrainloop(
           title: lesson.title,
           content: lesson.content,
           order: index + 1,
-          isPublished: true,
         }))
       );
 

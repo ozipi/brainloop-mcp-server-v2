@@ -254,12 +254,11 @@ export class BrainloopService {
   async createCoursesBatch(courses: Array<{
     title: string;
     description: string;
-    isPublic?: boolean;
-    isPublished?: boolean;
+    isPrivate?: boolean;
   }>): Promise<Course[]> {
     return this.makeRequest<Course[]>('/mcp/courses/batch', {
       method: 'POST',
-      body: JSON.stringify({ courses }),
+      body: JSON.stringify(courses),
     });
   }
 
@@ -270,12 +269,11 @@ export class BrainloopService {
     title: string;
     description: string;
     order: number;
-    isPublished?: boolean;
     dependencies?: string[];
   }>): Promise<Unit[]> {
     return this.makeRequest<Unit[]>(`/mcp/courses/${courseId}/units/batch`, {
       method: 'POST',
-      body: JSON.stringify({ units }),
+      body: JSON.stringify(units),
     });
   }
 
@@ -286,13 +284,11 @@ export class BrainloopService {
     title: string;
     content: string;
     order: number;
-    isPublished?: boolean;
     videoUrl?: string;
-    estimatedDuration?: number;
   }>): Promise<Lesson[]> {
     return this.makeRequest<Lesson[]>(`/mcp/units/${unitId}/lessons/batch`, {
       method: 'POST',
-      body: JSON.stringify({ lessons }),
+      body: JSON.stringify(lessons),
     });
   }
 }
