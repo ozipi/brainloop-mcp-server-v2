@@ -24,12 +24,12 @@ export interface Course {
   id: string;
   title: string;
   description: string;
-  isPublic: boolean;
+  isPrivate: boolean;
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
-  authorId: string;
-  author: {
+  userId: string;
+  user: {
     name: string;
     email: string;
   };
