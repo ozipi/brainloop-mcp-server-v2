@@ -52,8 +52,6 @@ export async function handleCreateBrainloop(
         title: topic,
         description: `Learn about ${topic}`,
         order: index + 1,
-        isPublished: true,
-        dependencies: [],
       }))
     );
 
