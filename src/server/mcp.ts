@@ -197,7 +197,7 @@ export class MCPHandler implements IMCPHandler {
         'x-session-id': req.headers['x-session-id'],
         'authorization': req.headers['authorization'] ? 'Bearer ***' : 'none'
       },
-      body: req.body ? { method: req.body.method, id: req.body.id } : 'no body',
+      contentType: req.headers['content-type'],
       timestamp: new Date().toISOString()
     });
 
@@ -221,8 +221,8 @@ export class MCPHandler implements IMCPHandler {
         // Let the session's transport handle the request
         await sessionInfo.transport.handleRequest(req, res);
 
-      } else if (!sessionId && this.isInitializeRequest(req.body)) {
-        // Create new session for MCP initialization
+      } else if (!sessionId && req.method === 'POST') {
+        // Create new session for any POST without session ID (likely initialization)
         const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
         // Extract auth info if available
@@ -365,7 +365,7 @@ export class MCPHandler implements IMCPHandler {
 
         console.log("📡 [MCP] Invalid request", {
           sessionId,
-          isInitializeRequest: this.isInitializeRequest(req.body),
+          method: req.method,
           errorMessage,
           timestamp: new Date().toISOString()
         });
@@ -411,12 +411,6 @@ export class MCPHandler implements IMCPHandler {
     }
   }
 
-  /**
-   * Checks if the request is an MCP initialization request
-   */
-  private isInitializeRequest(body: any): boolean {
-    return body && body.method === 'initialize';
-  }
 
   /**
    * Clean up old sessions

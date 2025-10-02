@@ -86,10 +86,16 @@ export async function createApp(): Promise<express.Application> {
     next();
   });
 
-  // Selective body parsing - skip for MCP streaming endpoints
+  // Selective body parsing - skip for MCP endpoints to preserve request stream
   app.use((req, res, next) => {
-    if (req.path === '/mcp') {
-      next(); // Skip body parsing for MCP
+    // Skip body parsing for MCP endpoints - transport needs raw stream
+    if (req.path === '/' || req.path === '/mcp') {
+      console.log("🔄 [MCP] Skipping body parsing to preserve request stream", {
+        path: req.path,
+        method: req.method,
+        timestamp: new Date().toISOString()
+      });
+      next(); // Let MCP transport handle raw stream
     } else {
       express.json()(req, res, (err) => {
         if (err) return next(err);
