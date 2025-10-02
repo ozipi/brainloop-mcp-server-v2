@@ -314,7 +314,7 @@ export class MCPHandler implements IMCPHandler {
           return originalWrite(chunk, encoding, callback);
         } as any;
 
-        // Override end to ensure session headers are set
+        // Override end to ensure session headers are set and log response body
         res.end = function(chunk?: any, encoding?: any, callback?: any) {
           if (!res.headersSent) {
             Object.entries(sessionHeaders).forEach(([key, value]) => {
@@ -326,6 +326,21 @@ export class MCPHandler implements IMCPHandler {
               timestamp: new Date().toISOString()
             });
           }
+
+          // Log response body for debugging
+          if (chunk) {
+            try {
+              const body = chunk.toString();
+              console.log("📡 [MCP] Response body", {
+                sessionId: newSessionId,
+                body: body.substring(0, 500), // First 500 chars
+                timestamp: new Date().toISOString()
+              });
+            } catch (e) {
+              // Ignore if not convertible to string
+            }
+          }
+
           return originalEnd(chunk, encoding, callback);
         } as any;
 
