@@ -25,7 +25,6 @@ export interface Course {
   title: string;
   description: string;
   isPrivate: boolean;
-  isPublished: boolean;
   createdAt: string;
   updatedAt: string;
   userId: string;

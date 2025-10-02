@@ -101,8 +101,7 @@ export async function handleViewBrainloops(
               `**${course.title}**\n` +
               `  📝 ${course.description}\n` +
               `  🆔 ID: ${course.id}\n` +
-              `  ${course.isPublished ? '✅ Published' : '📝 Draft'} • ` +
-              `${!course.isPrivate ? '🌍 Public' : '🔒 Private'}\n` +
+              `  ${!course.isPrivate ? '🌍 Public' : '🔒 Private'}\n` +
               (course._count ? `  📊 ${course._count.units} units • ${course._count.enrollments} learners\n` : '') +
               `  👤 By: ${course.user.name}\n`
             ).join('\n'))
