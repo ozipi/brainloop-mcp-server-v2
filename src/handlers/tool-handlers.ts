@@ -18,10 +18,18 @@ import type {
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { TOOLS, TOOL_ERROR_MESSAGES } from '../constants/tools.js';
+import { BrainloopService } from '../services/brainloop/brainloop-service.js';
 import { RedditService } from '../services/reddit/reddit-service.js';
 import { logger } from '../utils/logger.js';
 import type { RedditAuthInfo, MCPToolContext } from '../types/request-context.js';
 import type { ToolHandlerContext } from './tools/types.js';
+import {
+  handleCreateBrainloop,
+  handleViewBrainloops,
+  handleGetBrainloop,
+  handleExpandBrainloop,
+  handleBrainloopProgress,
+} from './tools/brainloop-handlers.js';
 import type {
   GetChannelArgs,
   GetPostArgs,
@@ -43,11 +51,33 @@ import {
 } from './tools/index.js';
 
 /**
- * Zod schemas for tool validation
+ * Zod schemas for brainloop tool validation
  */
 const ToolSchemas = {
-  test_brainloop: z.object({
-    message: z.string().min(1).describe("Test message to echo back"),
+  create_brainloop: z.object({
+    title: z.string().min(1).describe("Title of the brainloop"),
+    description: z.string().min(1).describe("Description of the brainloop"),
+    topics: z.array(z.string()).min(1).describe("List of topics/units for the brainloop"),
+    isPublic: z.boolean().optional().describe("Make brainloop public"),
+    isPublished: z.boolean().optional().describe("Publish brainloop immediately"),
+  }),
+  view_brainloops: z.object({}),
+  get_brainloop: z.object({
+    brainloopId: z.string().min(1).describe("The ID of the brainloop"),
+  }),
+  expand_brainloop: z.object({
+    brainloopId: z.string().min(1).describe("The ID of the brainloop to expand"),
+    units: z.array(z.object({
+      title: z.string().min(1).describe("Unit title"),
+      description: z.string().min(1).describe("Unit description"),
+      lessons: z.array(z.object({
+        title: z.string().min(1).describe("Lesson title"),
+        content: z.string().min(1).describe("Lesson content"),
+      })).min(1).describe("Lessons for this unit"),
+    })).min(1).describe("Units to add"),
+  }),
+  brainloop_progress: z.object({
+    brainloopId: z.string().optional().describe("Specific brainloop ID (optional)"),
   }),
   search_reddit: z.object({
     query: z.string().min(1).max(500).describe("Search query"),
@@ -315,16 +345,34 @@ export async function handleToolCall(
 
     let result: CallToolResult;
 
+    // Create brainloop service for brainloop tools
+    const userId = context.authInfo.extra?.userId || 'unknown';
+    const brainloopService = new BrainloopService({
+      accessToken: context.authInfo.token,
+      userId,
+    });
+
+    const brainloopContext = {
+      brainloopService,
+      userId,
+      sessionId: context.sessionId,
+    };
+
     switch (request.params.name) {
-      case "test_brainloop":
-        result = {
-          content: [
-            {
-              type: "text",
-              text: `✅ BRAINLOOP MCP Server is connected and working!\n\nYour message: ${args.message}\n\nServer: mcp.brainloop.cc\nStatus: Connected\nSession ID: ${context.sessionId}`,
-            },
-          ],
-        };
+      case "create_brainloop":
+        result = await handleCreateBrainloop(args as any, brainloopContext);
+        break;
+      case "view_brainloops":
+        result = await handleViewBrainloops(args, brainloopContext);
+        break;
+      case "get_brainloop":
+        result = await handleGetBrainloop(args as any, brainloopContext);
+        break;
+      case "expand_brainloop":
+        result = await handleExpandBrainloop(args as any, brainloopContext);
+        break;
+      case "brainloop_progress":
+        result = await handleBrainloopProgress(args as any, brainloopContext);
         break;
       case "get_channel":
         result = await handleGetChannel(args as GetChannelArgs, handlerContext);

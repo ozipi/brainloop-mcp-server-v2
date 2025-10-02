@@ -11,7 +11,11 @@
  */
 
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { testBrainloop } from '../constants/tool/test-brainloop.js';
+import { createBrainloop } from '../constants/tool/create-brainloop.js';
+import { viewBrainloops } from '../constants/tool/view-brainloops.js';
+import { expandBrainloop } from '../constants/tool/expand-brainloop.js';
+import { brainloopProgress } from '../constants/tool/brainloop-progress.js';
+import { getBrainloop } from '../constants/tool/get-brainloop.js';
 import type { RedditConfigData } from '../types/config.js';
 
 /**
@@ -41,32 +45,27 @@ export const TOOL_RESPONSE_MESSAGES = {
 } as const;
 
 /**
- * Array of all available MCP tools for Reddit operations.
- * 
+ * Array of all available brainloop tools.
+ *
  * @remarks
- * Each tool provides specific functionality for interacting with Reddit:
- * - `getChannel`: Fetch subreddit information
- * - `getPost`: Retrieve a specific Reddit post
- * - `getNotifications`: Get user notifications and messages
- * - `searchReddit`: Search across Reddit
- * - `getComment`: Retrieve a specific comment
- * 
- * Example/Tutorial tools:
- * - `elicitation_example`: Demonstrates requesting user input
- * - `sampling_example`: Demonstrates AI-assisted operations
- * - `structured_data_example`: Demonstrates returning structured data
- * 
- * Utility tools:
- * - `mcp_logging`: Request server to log messages for debugging
- * 
- * Tools that modify Reddit content (create, edit, delete) use the sampling
- * feature to generate content with AI assistance.
- * 
+ * Brainloop-centric tools for creating and managing learning experiences:
+ * - `create_brainloop`: Create a complete brainloop about any topic
+ * - `view_brainloops`: See all your brainloops
+ * - `get_brainloop`: Get detailed information about a specific brainloop
+ * - `expand_brainloop`: Add more content to an existing brainloop
+ * - `brainloop_progress`: Track your learning progress
+ *
+ * A "brainloop" is a complete learning experience - a structured course
+ * with units and lessons designed for effective learning.
+ *
  * @see {@link https://modelcontextprotocol.io/specification/2025-06-18/core/tools | MCP Tools}
- * @see {@link https://modelcontextprotocol.io/specification/2025-06-18/client/sampling | MCP Sampling}
  */
 export const TOOLS: Tool[] = [
-  testBrainloop,
+  createBrainloop,
+  viewBrainloops,
+  getBrainloop,
+  expandBrainloop,
+  brainloopProgress,
 ];
 
 /**
