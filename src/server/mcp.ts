@@ -226,9 +226,10 @@ export class MCPHandler implements IMCPHandler {
         const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
         // Extract auth info if available
-        const sessionAuth = req.auth?.token ? {
-          accessToken: req.auth.token,
-          refreshToken: String(req.auth.extra?.refreshToken || ""),
+        // Use the Google access token from req.auth.extra instead of the wrapper JWT
+        const sessionAuth = req.auth?.extra?.redditAccessToken ? {
+          accessToken: String(req.auth.extra.redditAccessToken),
+          refreshToken: String(req.auth.extra?.redditRefreshToken || ""),
           username: String(req.auth.extra?.userId || "unknown"),
         } : undefined;
 
