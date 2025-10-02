@@ -205,6 +205,29 @@ export class OAuthProvider {
 
   setupRoutes(app: express.Application): void {
     /**
+     * MCP Client Configuration Discovery
+     *
+     * @remarks
+     * This endpoint allows Claude Desktop to discover the MCP server configuration.
+     * Returns information about authentication type and resource endpoints.
+     */
+    app.get("/.well-known/mcp-client-config", (_req, res) => {
+      res.json({
+        authentication: {
+          type: "oauth2.1",
+          authorization_url: `${this.config.OAUTH_ISSUER}/oauth/authorize`,
+          token_url: `${this.config.OAUTH_ISSUER}/oauth/token`,
+        },
+        capabilities: {
+          tools: true,
+          prompts: true,
+          resources: true,
+          sampling: true,
+        },
+      });
+    });
+
+    /**
      * OAuth 2.0 Authorization Server Metadata
      *
      * @remarks
