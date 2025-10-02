@@ -269,7 +269,6 @@ export class BrainloopService {
     title: string;
     description: string;
     order: number;
-    dependencies?: string[];
   }>): Promise<Unit[]> {
     return this.makeRequest<Unit[]>(`/mcp/courses/${courseId}/units/batch`, {
       method: 'POST',
