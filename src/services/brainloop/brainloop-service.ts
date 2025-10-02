@@ -163,56 +163,56 @@ export class BrainloopService {
    * Get public courses
    */
   async getPublicCourses(): Promise<Course[]> {
-    return this.makeRequest<Course[]>('/courses?public=true');
+    return this.makeRequest<Course[]>('/mcp/courses?public=true');
   }
 
   /**
    * Get course details by ID
    */
   async getCourse(courseId: string): Promise<Course> {
-    return this.makeRequest<Course>(`/courses/${courseId}`);
+    return this.makeRequest<Course>(`/mcp/courses/${courseId}`);
   }
 
   /**
    * Get course units
    */
   async getCourseUnits(courseId: string): Promise<Unit[]> {
-    return this.makeRequest<Unit[]>(`/courses/${courseId}/units`);
+    return this.makeRequest<Unit[]>(`/mcp/courses/${courseId}/units`);
   }
 
   /**
    * Get unit lessons
    */
   async getUnitLessons(unitId: string): Promise<Lesson[]> {
-    return this.makeRequest<Lesson[]>(`/units/${unitId}/lessons`);
+    return this.makeRequest<Lesson[]>(`/mcp/units/${unitId}/lessons`);
   }
 
   /**
    * Get specific lesson
    */
   async getLesson(lessonId: string): Promise<Lesson> {
-    return this.makeRequest<Lesson>(`/lessons/${lessonId}`);
+    return this.makeRequest<Lesson>(`/mcp/lessons/${lessonId}`);
   }
 
   /**
    * Get user's progress
    */
   async getProgress(): Promise<Progress[]> {
-    return this.makeRequest<Progress[]>('/progress');
+    return this.makeRequest<Progress[]>('/mcp/progress');
   }
 
   /**
    * Get course progress for user
    */
   async getCourseProgress(courseId: string): Promise<Progress[]> {
-    return this.makeRequest<Progress[]>(`/courses/${courseId}/progress`);
+    return this.makeRequest<Progress[]>(`/mcp/courses/${courseId}/progress`);
   }
 
   /**
    * Mark lesson as complete
    */
   async completeLesson(lessonId: string): Promise<{ success: boolean }> {
-    return this.makeRequest<{ success: boolean }>(`/lessons/${lessonId}/complete`, {
+    return this.makeRequest<{ success: boolean }>(`/mcp/lessons/${lessonId}/complete`, {
       method: 'POST',
     });
   }
@@ -221,7 +221,7 @@ export class BrainloopService {
    * Enroll in course
    */
   async enrollInCourse(courseId: string): Promise<{ success: boolean }> {
-    return this.makeRequest<{ success: boolean }>(`/courses/${courseId}/enroll`, {
+    return this.makeRequest<{ success: boolean }>(`/mcp/courses/${courseId}/enroll`, {
       method: 'POST',
     });
   }
@@ -230,14 +230,14 @@ export class BrainloopService {
    * Search lessons
    */
   async searchLessons(query: string): Promise<Lesson[]> {
-    return this.makeRequest<Lesson[]>(`/lessons/search?q=${encodeURIComponent(query)}`);
+    return this.makeRequest<Lesson[]>(`/mcp/lessons/search?q=${encodeURIComponent(query)}`);
   }
 
   /**
    * Get user profile
    */
   async getUserProfile(): Promise<BrainloopUser> {
-    return this.makeRequest<BrainloopUser>('/user/profile');
+    return this.makeRequest<BrainloopUser>('/mcp/user/profile');
   }
 
   /**
@@ -249,7 +249,7 @@ export class BrainloopService {
     totalTimeSpent: number;
     streakDays: number;
   }> {
-    return this.makeRequest('/user/analytics');
+    return this.makeRequest('/mcp/user/analytics');
   }
 
   /**
@@ -261,7 +261,7 @@ export class BrainloopService {
     isPublic?: boolean;
     isPublished?: boolean;
   }>): Promise<Course[]> {
-    return this.makeRequest<Course[]>('/courses/batch', {
+    return this.makeRequest<Course[]>('/mcp/courses/batch', {
       method: 'POST',
       body: JSON.stringify({ courses }),
     });
@@ -277,7 +277,7 @@ export class BrainloopService {
     isPublished?: boolean;
     dependencies?: string[];
   }>): Promise<Unit[]> {
-    return this.makeRequest<Unit[]>(`/courses/${courseId}/units/batch`, {
+    return this.makeRequest<Unit[]>(`/mcp/courses/${courseId}/units/batch`, {
       method: 'POST',
       body: JSON.stringify({ units }),
     });
@@ -294,7 +294,7 @@ export class BrainloopService {
     videoUrl?: string;
     estimatedDuration?: number;
   }>): Promise<Lesson[]> {
-    return this.makeRequest<Lesson[]>(`/units/${unitId}/lessons/batch`, {
+    return this.makeRequest<Lesson[]>(`/mcp/units/${unitId}/lessons/batch`, {
       method: 'POST',
       body: JSON.stringify({ lessons }),
     });
