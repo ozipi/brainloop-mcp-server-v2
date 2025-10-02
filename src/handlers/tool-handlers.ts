@@ -46,6 +46,9 @@ import {
  * Zod schemas for tool validation
  */
 const ToolSchemas = {
+  test_brainloop: z.object({
+    message: z.string().min(1).describe("Test message to echo back"),
+  }),
   search_reddit: z.object({
     query: z.string().min(1).max(500).describe("Search query"),
     subreddit: z.string().optional().describe("Specific subreddit to search (optional)"),
@@ -313,6 +316,16 @@ export async function handleToolCall(
     let result: CallToolResult;
 
     switch (request.params.name) {
+      case "test_brainloop":
+        result = {
+          content: [
+            {
+              type: "text",
+              text: `✅ BRAINLOOP MCP Server is connected and working!\n\nYour message: ${args.message}\n\nServer: mcp.brainloop.cc\nStatus: Connected\nSession ID: ${context.sessionId}`,
+            },
+          ],
+        };
+        break;
       case "get_channel":
         result = await handleGetChannel(args as GetChannelArgs, handlerContext);
         break;

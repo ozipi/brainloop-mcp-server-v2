@@ -11,16 +11,7 @@
  */
 
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { getChannel } from '../constants/tool/get-channel.js';
-import { getComment } from '../constants/tool/get-comment.js';
-import { getNotifications } from '../constants/tool/get-notifications.js';
-import { getPost } from '../constants/tool/get-post.js';
-import { searchReddit } from '../constants/tool/search-reddit.js';
-import { ELICITATION_EXAMPLE_TOOL } from './tool/elicitation-example.js';
-import { SAMPLING_EXAMPLE_TOOL } from './tool/sampling-example.js';
-import { STRUCTURED_DATA_EXAMPLE_TOOL } from './tool/structured-data-example.js';
-import { MCP_LOGGING_TOOL } from './tool/logging.js';
-import { VALIDATION_EXAMPLE_TOOL } from './tool/validation-example.js';
+import { testBrainloop } from '../constants/tool/test-brainloop.js';
 import type { RedditConfigData } from '../types/config.js';
 
 /**
@@ -75,16 +66,7 @@ export const TOOL_RESPONSE_MESSAGES = {
  * @see {@link https://modelcontextprotocol.io/specification/2025-06-18/client/sampling | MCP Sampling}
  */
 export const TOOLS: Tool[] = [
-  getChannel,
-  getPost,
-  getNotifications,
-  searchReddit,
-  getComment,
-  ELICITATION_EXAMPLE_TOOL,
-  SAMPLING_EXAMPLE_TOOL,
-  STRUCTURED_DATA_EXAMPLE_TOOL,
-  MCP_LOGGING_TOOL,
-  VALIDATION_EXAMPLE_TOOL,
+  testBrainloop,
 ];
 
 /**
