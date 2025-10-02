@@ -259,14 +259,78 @@ export class MCPHandler implements IMCPHandler {
           timestamp: new Date().toISOString()
         });
 
-        // CRITICAL: Set session headers BEFORE transport handles request
-        res.setHeader("mcp-session-id", newSessionId);
-        res.setHeader("x-session-id", newSessionId);
-        res.setHeader("Mcp-Session-Id", newSessionId);
+        // Create a response wrapper that preserves our session headers
+        const originalSetHeader = res.setHeader.bind(res);
+        const originalEnd = res.end.bind(res);
+        const originalWrite = res.write.bind(res);
+        const originalWriteHead = res.writeHead.bind(res);
 
-        console.log("📡 [MCP] Setting session headers", {
+        // Preserve session headers
+        const sessionHeaders = {
+          "mcp-session-id": newSessionId,
+          "x-session-id": newSessionId,
+          "Mcp-Session-Id": newSessionId
+        };
+
+        // Override writeHead to inject session headers (handle all signatures)
+        res.writeHead = function(statusCode: number, statusMessage?: any, headers?: any) {
+          let finalHeaders: any;
+          let finalStatusMessage: any;
+
+          // Handle different writeHead signatures
+          if (typeof statusMessage === 'string') {
+            finalHeaders = { ...headers, ...sessionHeaders };
+            finalStatusMessage = statusMessage;
+          } else {
+            finalHeaders = { ...statusMessage, ...sessionHeaders };
+            finalStatusMessage = undefined;
+          }
+
+          console.log("📡 [MCP] Injecting session headers in writeHead", {
+            sessionId: newSessionId,
+            statusCode,
+            finalHeaders: Object.keys(finalHeaders || {}),
+            timestamp: new Date().toISOString()
+          });
+
+          if (finalStatusMessage) {
+            return originalWriteHead(statusCode, finalStatusMessage, finalHeaders);
+          } else {
+            return originalWriteHead(statusCode, finalHeaders);
+          }
+        } as any;
+
+        // Override write to inject headers before first write (for SSE)
+        res.write = function(chunk: any, encoding?: any, callback?: any) {
+          if (!res.headersSent) {
+            Object.entries(sessionHeaders).forEach(([key, value]) => {
+              originalSetHeader(key, value);
+            });
+            console.log("📡 [MCP] Session headers set in write() before first chunk", {
+              sessionId: newSessionId,
+              timestamp: new Date().toISOString()
+            });
+          }
+          return originalWrite(chunk, encoding, callback);
+        } as any;
+
+        // Override end to ensure session headers are set
+        res.end = function(chunk?: any, encoding?: any, callback?: any) {
+          if (!res.headersSent) {
+            Object.entries(sessionHeaders).forEach(([key, value]) => {
+              originalSetHeader(key, value);
+            });
+            console.log("📡 [MCP] Final session headers set in end()", {
+              sessionId: newSessionId,
+              headersSent: res.headersSent,
+              timestamp: new Date().toISOString()
+            });
+          }
+          return originalEnd(chunk, encoding, callback);
+        } as any;
+
+        console.log("📡 [MCP] Response wrapper configured", {
           sessionId: newSessionId,
-          headersSent: res.headersSent,
           timestamp: new Date().toISOString()
         });
 
