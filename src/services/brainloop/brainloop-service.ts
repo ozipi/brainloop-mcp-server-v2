@@ -44,8 +44,6 @@ export interface Unit {
   description?: string;
   order: number;
   courseId: string;
-  isPublished: boolean;
-  dependencies: string[];
   _count?: {
     lessons: number;
   };
@@ -57,7 +55,6 @@ export interface Lesson {
   content: string;
   order: number;
   unitId: string;
-  isPublished: boolean;
   videoUrl?: string;
 }
 

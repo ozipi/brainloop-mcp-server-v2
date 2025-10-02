@@ -67,8 +67,7 @@ export async function handleCreateBrainloop(
           `**${course.title}**\n` +
           `${course.description}\n\n` +
           `**Brainloop ID:** ${course.id}\n` +
-          `**Status:** ${course.isPublished ? 'Published' : 'Draft'}\n` +
-          `**Visibility:** ${course.isPublic ? 'Public' : 'Private'}\n\n` +
+          `**Visibility:** ${!course.isPrivate ? '🌍 Public' : '🔒 Private'}\n\n` +
           `**Learning Path (${units.length} topics):**\n` +
           units.map((unit, i) => `${i + 1}. ${unit.title} (Unit ID: ${unit.id})`).join('\n') +
           `\n\n💡 **Next steps:** You can now expand this brainloop by adding lessons to each unit using \`expand_brainloop\`.`
@@ -132,17 +131,15 @@ export async function handleGetBrainloop(
           `📝 ${course.description}\n\n` +
           `**Details:**\n` +
           `• Brainloop ID: ${course.id}\n` +
-          `• Status: ${course.isPublished ? '✅ Published' : '📝 Draft'}\n` +
-          `• Visibility: ${course.isPublic ? '🌍 Public' : '🔒 Private'}\n` +
+          `• Visibility: ${!course.isPrivate ? '🌍 Public' : '🔒 Private'}\n` +
           `• Created: ${new Date(course.createdAt).toLocaleDateString()}\n` +
-          `• Author: ${course.author.name} (${course.author.email})\n\n` +
+          `• Author: ${course.user.name} (${course.user.email})\n\n` +
           `**Learning Path (${units.length} units):**\n` +
           units.map(unit =>
             `${unit.order}. **${unit.title}**\n` +
             `   ${unit.description || 'No description'}\n` +
-            `   Unit ID: ${unit.id} • ${unit.isPublished ? 'Published' : 'Draft'}\n` +
-            (unit._count ? `   ${unit._count.lessons} lessons\n` : '') +
-            (unit.dependencies.length > 0 ? `   Requires: ${unit.dependencies.join(', ')}\n` : '')
+            `   Unit ID: ${unit.id}\n` +
+            (unit._count ? `   ${unit._count.lessons} lessons\n` : '')
           ).join('\n')
       }]
     };
