@@ -1,12 +1,12 @@
 import type { SamplingPrompt } from '../../types/sampling.js';
 
 export const SUGGEST_ACTION_PROMPT: SamplingPrompt = {
-  name: "reddit_suggest_action",
-  description: "Analyzes recent Reddit activity and suggests the next action",
+  name: "brainloop_suggest_next",
+  description: "Analyzes learning progress and suggests the next brainloop action",
   arguments: [
     {
-      name: "recentPosts",
-      description: "JSON string of recent posts from configured subreddits",
+      name: "userProgress",
+      description: "JSON string of user's recent learning progress and courses",
       required: true,
     },
   ],
@@ -15,38 +15,38 @@ export const SUGGEST_ACTION_PROMPT: SamplingPrompt = {
       role: "assistant",
       content: {
         type: "text",
-        text: "You are an expert Reddit strategist who analyzes trends and activity to suggest optimal actions. You understand Reddit culture, timing, and engagement patterns to maximize impact.",
+        text: "You are an expert learning strategist who analyzes learning patterns and progress to suggest optimal next actions. You understand learning science, spacing effects, and engagement patterns to maximize retention and growth.",
       },
     },
     {
       role: "assistant",
       content: {
         type: "text",
-        text: "I understand the subreddit rules and posting guidelines:\n{{redditConfig}}",
+        text: "I understand the brainloop creation guidelines:\n{{brainloopGuidelines}}",
       },
     },
     {
       role: "assistant",
       content: {
         type: "text",
-        text: "I will follow these content creation instructions:\n{{redditInstructions}}",
+        text: "I will follow these learning design principles:\n{{learningPrinciples}}",
       },
     },
     {
       role: "user",
       content: {
         type: "text",
-        text: `Analyze the following recent Reddit posts and suggest the optimal next action:
+        text: `Analyze the following user progress and suggest the optimal next learning action:
 
-Recent Posts:
-{{recentPosts}}
+User Progress:
+{{userProgress}}
 
 Based on this data:
-1. Identify trending topics or patterns
-2. Determine the best action (create a post, reply to a specific post, or wait)
-3. Suggest a specific subreddit if applicable
-4. Provide a clear reasoning for your suggestion
-5. Suggest content direction if recommending a post or reply`,
+1. Identify learning patterns or knowledge gaps
+2. Determine the best action (continue current brainloop, start new topic, or review completed content)
+3. Suggest a specific brainloop or lesson if applicable
+4. Provide clear reasoning for your suggestion
+5. Suggest learning path direction for optimal retention`,
       },
     },
   ],

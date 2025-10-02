@@ -10,25 +10,25 @@
 import type { SamplingPrompt } from '../../types/sampling.js';
 
 /**
- * Example prompt for code generation that uses injected resources.
- * 
+ * Example prompt for brainloop creation that uses injected resources.
+ *
  * @remarks
  * This prompt demonstrates how the {{resource_*}} placeholders can be used
  * to inject resource content (like guidelines) into the prompt context.
  * The resource injection happens automatically in the prompt handler.
  */
 export const CODE_GENERATION_EXAMPLE_PROMPT: SamplingPrompt = {
-  name: "code_generation_example",
-  description: "Example prompt that demonstrates resource injection for code generation",
+  name: "brainloop_creation_example",
+  description: "Example prompt that demonstrates resource injection for brainloop creation",
   arguments: [
     {
-      name: "task",
-      description: "The coding task to complete",
+      name: "topic",
+      description: "The learning topic to create a brainloop for",
       required: true,
     },
     {
-      name: "language",
-      description: "Programming language to use",
+      name: "targetAudience",
+      description: "Target audience skill level (beginner, intermediate, advanced)",
       required: false,
     },
   ],
@@ -37,23 +37,23 @@ export const CODE_GENERATION_EXAMPLE_PROMPT: SamplingPrompt = {
       role: "assistant",
       content: {
         type: "text",
-        text: "I am an expert software developer ready to help with code generation tasks. {{resource_code_generation}}",
+        text: "I am an expert learning designer ready to help create engaging brainloops. {{resource_brainloop_creation}}",
       },
     },
     {
       role: "user",
       content: {
         type: "text",
-        text: `Please help me with the following coding task:
+        text: `Please help me create a brainloop for the following:
 
-Task: {{task}}
-Language: {{language}}
+Topic: {{topic}}
+Target Audience: {{targetAudience}}
 
-Follow the code generation guidelines and best practices that have been provided.`,
+Follow the brainloop creation guidelines and learning design principles that have been provided.`,
       },
     },
   ],
   _meta: {
-    callback: "code_generation_callback",
+    callback: "brainloop_creation_callback",
   },
 };
