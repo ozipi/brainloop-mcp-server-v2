@@ -84,9 +84,16 @@ Brainloop: "Machine Learning Fundamentals"
 ### 3. **Best Practices**
 - **Start simple**: Begin with 3-5 units
 - **Progressive complexity**: Each unit builds on previous ones
-- **Hands-on content**: Include examples and exercises
+- **Interactive learning**: ALWAYS include questions and exercises in lessons
 - **Clear learning paths**: Show progression clearly
 - **Iterative expansion**: Start small, expand later with \`expand_brainloop\`
+
+### 4. **Essential Components for Every Lesson**
+Every lesson MUST include:
+- **Core Teaching**: Explanation with examples
+- **Interactive Questions**: 2-5 questions that test understanding
+- **Practice Exercise**: Hands-on application of the concept
+- **Self-Assessment**: Reflection prompts or checkpoints
 
 ## Using Brainloop Tools
 
@@ -150,13 +157,14 @@ Each lesson should answer:
 
 ### Lesson Design
 - **Title**: Clear and descriptive
-- **Content**:
-  - Introduction (Why learn this?)
-  - Core concept explanation
-  - Examples and demonstrations
-  - Practice opportunities
-  - Summary and next steps
+- **Content Structure** (REQUIRED):
+  1. **Introduction** (Why learn this?)
+  2. **Core Concept** explanation with examples
+  3. **Interactive Questions** (2-5 questions to test understanding)
+  4. **Practice Exercise** (Hands-on application)
+  5. **Summary** and key takeaways
 - **Length**: 5-15 minutes of content
+- **Interactivity**: Every lesson MUST include questions and exercises
 
 ### Content Guidelines
 - Use **markdown** for formatting
@@ -220,7 +228,7 @@ Brainloop: "Public Speaking"
 
 ## Lesson Content Format
 
-### Recommended Structure
+### Recommended Structure (ALWAYS USE THIS)
 \`\`\`markdown
 # Lesson Title
 
@@ -230,8 +238,22 @@ Brief overview of what learner will gain
 ## Core Concept
 Main teaching content with examples
 
-## Practice
-Hands-on exercise or example
+## Check Your Understanding
+**Question 1:** [Question text]
+- A) [Option]
+- B) [Option]
+- C) [Option]
+- D) [Option]
+
+**Answer:** [Correct answer with brief explanation]
+
+**Question 2:** [Question text]
+**Answer:** [Answer with explanation]
+
+[Include 2-5 questions per lesson]
+
+## Practice Exercise
+Hands-on exercise or real-world application task
 
 ## Summary
 Key takeaways and next steps
@@ -243,6 +265,9 @@ Key takeaways and next steps
 - \`Code blocks\` for technical content
 - > Blockquotes for important notes
 - Lists for steps or key points
+- **Always include interactive questions** - This is NON-NEGOTIABLE
+- Mix multiple-choice and open-ended questions
+- Provide answers/explanations for all questions
 
 ## Expanding Brainloops
 
@@ -263,6 +288,7 @@ Start with core content, then expand:
     "Practical Applications",
     "Projects and Practice"
   ],
+  "lesson_content_example": "# Lesson Title\\n\\n## Introduction\\nBrief overview of what learner will gain\\n\\n## Core Concept\\nMain teaching content with examples\\n\\n## Check Your Understanding\\n**Question 1:** What is the main purpose of this concept?\\n- A) Option 1\\n- B) Option 2\\n- C) Option 3\\n- D) Option 4\\n\\n**Answer:** C - Option 3. [Brief explanation why]\\n\\n**Question 2:** How would you apply this in a real-world scenario?\\n**Answer:** [Open-ended answer with guidance]\\n\\n## Practice Exercise\\nHands-on task to apply what you learned\\n\\n## Summary\\nKey takeaways and next steps",
   "units": [
     {
       "title": "Introduction and Fundamentals",
@@ -270,15 +296,15 @@ Start with core content, then expand:
       "lessons": [
         {
           "title": "What is [Topic]?",
-          "content": "# Introduction\\n\\nExplain the basics..."
+          "content": "MUST include: Introduction + Core Concept + 2-5 Questions + Practice Exercise + Summary"
         },
         {
           "title": "Why Learn [Topic]?",
-          "content": "# Motivation\\n\\nReal-world applications..."
+          "content": "MUST include: Introduction + Core Concept + 2-5 Questions + Practice Exercise + Summary"
         },
         {
           "title": "Getting Started",
-          "content": "# First Steps\\n\\nHow to begin..."
+          "content": "MUST include: Introduction + Core Concept + 2-5 Questions + Practice Exercise + Summary"
         }
       ]
     },
@@ -288,11 +314,11 @@ Start with core content, then expand:
       "lessons": [
         {
           "title": "Concept 1",
-          "content": "# Core Concept\\n\\nDetailed explanation..."
+          "content": "MUST include: Introduction + Core Concept + 2-5 Questions + Practice Exercise + Summary"
         },
         {
           "title": "Concept 2",
-          "content": "# Building on Basics\\n\\nNext level..."
+          "content": "MUST include: Introduction + Core Concept + 2-5 Questions + Practice Exercise + Summary"
         }
       ]
     }
