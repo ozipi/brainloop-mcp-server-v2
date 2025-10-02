@@ -331,7 +331,7 @@ Start with core content, then expand:
  */
 export const SERVER_INFO = {
   name: "brainloop-mcp-server",
-  version: "3.0.0",
+  version: "3.0.1",
 } as const;
 
 /**
