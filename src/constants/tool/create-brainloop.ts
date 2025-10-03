@@ -5,7 +5,7 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 export const createBrainloop: Tool = {
   name: "create_brainloop",
-  description: "Create a new brainloop (learning course) with just the course structure and topics (NO lessons yet). A brainloop is a structured learning experience with lessons organized into units. After creating the structure, you MUST use expand_brainloop to add lessons ONE AT A TIME, verify each lesson, then add its interaction (questions/exercises), verify the interaction, then proceed to the next lesson. This lesson→verify→interaction→verify workflow prevents duplicate work if errors occur.",
+  description: "Create a new brainloop (learning course) with just the course structure and topics (NO lessons yet). A brainloop is a structured learning experience with lessons organized into units. After creating the structure, you MUST use expand_brainloop to add lessons ONE AT A TIME, verify each lesson, then add 5 interactions (questions/exercises) for that lesson, verify the interactions, then proceed to the next lesson. This lesson→verify→5 interactions→verify workflow prevents duplicate work if errors occur. DEFAULT: 5 interactions per lesson (user can specify different).",
   inputSchema: {
     type: "object",
     properties: {

@@ -85,7 +85,7 @@ Brainloop: "Machine Learning Fundamentals"
 - **Start simple**: Begin with 3-5 units (structure only, no lessons yet)
 - **ONE LESSON AT A TIME**: Use \`create_brainloop\` to create structure, then \`expand_brainloop\` to add ONE lesson at a time
 - **VERIFY EACH LESSON**: After adding each lesson, check the response to confirm it was created successfully before adding the next one
-- **ADD INTERACTIONS AFTER LESSON**: Once a lesson is verified, immediately add its interaction (questions/exercises) before proceeding to the next lesson
+- **ADD 5 INTERACTIONS AFTER LESSON**: Once a lesson is verified, immediately add 5 interactions (questions/exercises) before proceeding to the next lesson (unless user specifies a different number)
 - **VERIFY INTERACTION**: Confirm the interaction was created successfully before moving to the next lesson
 - **Prevent duplicate work**: This lesson-by-lesson + interaction verification prevents creating duplicate content if a failure occurs mid-process
 - **Progressive complexity**: Each unit builds on previous ones
@@ -96,11 +96,11 @@ Brainloop: "Machine Learning Fundamentals"
 ### 4. **Essential Components for Every Lesson**
 Every lesson MUST include:
 - **Core Teaching**: Explanation with examples (in lesson content)
-- **Interaction**: Created separately AFTER lesson is verified
+- **5 Interactions**: Created separately AFTER lesson is verified (default: 5, unless user specifies different)
   - **Type**: Questions, exercises, or assessments
-  - **Prompts**: 2-5 questions that test understanding
-  - **Practice Exercise**: Hands-on application of the concept
-  - **Self-Assessment**: Reflection prompts or checkpoints
+  - **Prompts**: Each interaction should test a specific aspect of understanding
+  - **Mix of types**: Multiple-choice, short answer, practice exercises, self-assessment
+  - **Progressive difficulty**: Start easy, increase complexity
 
 ## Using Brainloop Tools
 
@@ -110,14 +110,16 @@ Every lesson MUST include:
 Introduction, Data Types, Control Flow, Functions, and OOP"
 \`\`\`
 
-### Expand Existing Brainloop (ONE LESSON AT A TIME + INTERACTIONS)
+### Expand Existing Brainloop (ONE LESSON AT A TIME + 5 INTERACTIONS)
 \`\`\`
 "Add one lesson about decorators to the Functions unit in my Python brainloop"
 [Wait for confirmation that lesson was created]
-"Add an interaction with 3 questions to test understanding of decorators"
-[Wait for confirmation that interaction was created]
+"Add 5 interactions to test understanding of decorators"
+[Wait for confirmation that interactions were created]
 "Now add a lesson about generators to the same unit"
-[Repeat: lesson → verify → interaction → verify → next lesson]
+[Repeat: lesson → verify → 5 interactions → verify → next lesson]
+
+Note: User can specify different number: "Add 3 interactions instead"
 \`\`\`
 
 ### Track Progress
@@ -174,11 +176,12 @@ Each lesson should answer:
   2. **Core Concept** explanation with examples
   3. **Summary** and key takeaways
 - **Length**: 5-15 minutes of content
-- **Interaction** (Created separately AFTER lesson):
-  - **Interactive Questions** (2-5 questions to test understanding)
-  - **Practice Exercise** (Hands-on application)
-  - **Self-Assessment** prompts
-  - Every lesson MUST have an interaction
+- **5 Interactions** (Created separately AFTER lesson):
+  - **Default**: 5 interactions per lesson (user can specify different number)
+  - **Mix of types**: Multiple-choice, short answer, code challenges, practice exercises
+  - **Progressive difficulty**: Easy → Medium → Hard
+  - **Each interaction tests different aspect**: Comprehension, application, analysis, synthesis
+  - Every lesson MUST have 5 interactions (unless user specifies otherwise)
 
 ### Content Guidelines
 - Use **markdown** for formatting
@@ -258,27 +261,63 @@ Main teaching content with examples
 Key takeaways and next steps
 \`\`\`
 
-**Interaction (Created separately AFTER lesson is verified):**
+**5 Interactions (Created separately AFTER lesson is verified):**
 \`\`\`json
+// Interaction 1 - Easy Multiple Choice
 {
   "type": "assessment",
-  "prompts": [
-    {
-      "question": "Question text here",
-      "type": "multiple_choice",
-      "options": ["A) Option 1", "B) Option 2", "C) Option 3", "D) Option 4"],
-      "answer": "C",
-      "explanation": "Explanation of correct answer"
-    },
-    {
-      "question": "Open-ended question",
-      "type": "short_answer",
-      "answer": "Expected answer or key points"
-    }
-  ]
+  "prompts": [{
+    "question": "What is the basic concept of [topic]?",
+    "type": "multiple_choice",
+    "options": ["A) Option 1", "B) Option 2", "C) Option 3", "D) Option 4"],
+    "answer": "C",
+    "explanation": "Explanation of correct answer"
+  }]
+}
+
+// Interaction 2 - Medium Multiple Choice
+{
+  "type": "assessment",
+  "prompts": [{
+    "question": "How would you apply [concept] in this scenario?",
+    "type": "multiple_choice",
+    "options": ["A) Approach 1", "B) Approach 2", "C) Approach 3", "D) Approach 4"],
+    "answer": "B",
+    "explanation": "Detailed explanation"
+  }]
+}
+
+// Interaction 3 - Short Answer
+{
+  "type": "exercise",
+  "prompts": [{
+    "question": "Explain why [concept] is important",
+    "type": "short_answer",
+    "answer": "Expected key points: point 1, point 2, point 3"
+  }]
+}
+
+// Interaction 4 - Code/Practice Challenge
+{
+  "type": "exercise",
+  "prompts": [{
+    "question": "Complete this hands-on task: [specific task]",
+    "type": "code_challenge",
+    "answer": "Sample solution or approach"
+  }]
+}
+
+// Interaction 5 - Self-Assessment
+{
+  "type": "reflection",
+  "prompts": [{
+    "question": "How confident are you in applying this concept?",
+    "type": "self_assessment",
+    "answer": "Reflection prompt - no single correct answer"
+  }]
 }
 \`\`\`
-[Include 2-5 prompts per interaction]
+[Default: 5 interactions per lesson. User can specify different number.]
 
 ### Content Tips
 **For Lesson Content:**
@@ -290,31 +329,38 @@ Key takeaways and next steps
 - Focus on teaching content, NOT questions (questions go in interactions)
 
 **For Interactions:**
-- **Always create after lesson is verified** - This is NON-NEGOTIABLE
-- Mix multiple-choice and open-ended questions
+- **Always create 5 interactions after lesson is verified** - This is NON-NEGOTIABLE (unless user specifies different)
+- **Mix of types**: Multiple-choice, short answer, code challenges, self-assessment
+- **Progressive difficulty**: Interaction 1-2 (easy), 3-4 (medium), 5 (reflection)
 - Provide answers/explanations for all prompts
-- Include 2-5 prompts per interaction
+- Each interaction typically has 1 prompt (focused on one aspect)
 - Match interaction type to learning goal (assessment, exercise, reflection)
 
 ## Expanding Brainloops
 
-**CRITICAL: Add ONE LESSON at a time, then its INTERACTION, verify each step**
+**CRITICAL: Add ONE LESSON at a time, then its 5 INTERACTIONS, verify each step**
 
 Incremental expansion workflow:
 1. Create initial brainloop structure with \`create_brainloop\` (topics only)
-2. Use \`expand_brainloop\` to add ONE lesson
+2. Use \`expand_brainloop\` to add ONE lesson (teaching content only)
 3. **VERIFY**: Check response to confirm lesson was created successfully
-4. Add ONE interaction (questions/exercises) for that lesson
-5. **VERIFY**: Check response to confirm interaction was created successfully
-6. If both successful, proceed to next lesson
+4. Add 5 interactions (questions/exercises) for that lesson - one at a time or in batch
+5. **VERIFY**: Check response to confirm all 5 interactions were created successfully
+6. If all successful, proceed to next lesson
 7. If any step fails, troubleshoot before proceeding
-8. Repeat: lesson → verify → interaction → verify → next lesson
+8. Repeat: lesson → verify → 5 interactions → verify → next lesson
 9. Continue until unit is complete, then move to next unit
 
-**Why lesson-by-lesson + interaction-by-interaction?**
+**Default: 5 interactions per lesson**
+- User can override: "Add 3 interactions instead" or "Add 10 interactions"
+- Mix of difficulty levels (easy, medium, reflection)
+- Mix of types (multiple-choice, short answer, code, self-assessment)
+
+**Why lesson-by-lesson + 5-interactions-per-lesson?**
 - Prevents duplicate work if errors occur mid-creation
 - Allows quality verification at each granular step
-- Ensures each lesson has its interactive component before moving on
+- Ensures each lesson has rich interactive components (5) before moving on
+- Provides comprehensive assessment of understanding
 - Enables adjustments based on feedback
 - Catches issues early before compounding
 - Maintains clean state even if process is interrupted`,
