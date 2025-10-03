@@ -326,9 +326,11 @@ export class BrainloopService {
    * Create an interaction for a lesson
    */
   async createInteraction(lessonId: string): Promise<{ id: string; lessonId: string; type: string }> {
-    return this.makeRequest<{ id: string; lessonId: string; type: string }>(`/mcp/lessons/${lessonId}/interaction`, {
+    const response = await this.makeRequest<any>(`/mcp/lessons/${lessonId}/interaction`, {
       method: 'POST',
     });
+    // API returns nested interaction object, extract it
+    return response.interaction || response;
   }
 
   /**
