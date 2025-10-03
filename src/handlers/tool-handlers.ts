@@ -31,6 +31,8 @@ import {
   handleCreatePrompt,
   handleCreatePromptsBatch,
   handleGetLessonPrompts,
+  handleUpdateLesson,
+  handleUpdateUnit,
 } from './tools/brainloop-handlers.js';
 
 /**
@@ -99,6 +101,17 @@ const ToolSchemas = {
   }),
   get_lesson_prompts: z.object({
     lessonId: z.string().min(1).describe("The ID of the lesson"),
+  }),
+  update_lesson: z.object({
+    lessonId: z.string().min(1).describe("The ID of the lesson to update"),
+    title: z.string().optional().describe("New lesson title"),
+    content: z.string().optional().describe("New lesson content"),
+    videoUrl: z.string().optional().describe("New video URL"),
+  }),
+  update_unit: z.object({
+    unitId: z.string().min(1).describe("The ID of the unit to update"),
+    title: z.string().optional().describe("New unit title"),
+    description: z.string().optional().describe("New unit description"),
   }),
   search_reddit: z.object({
     query: z.string().min(1).max(500).describe("Search query"),
@@ -189,6 +202,8 @@ type ToolArgs = {
   create_prompt: any;
   create_prompts_batch: any;
   get_lesson_prompts: any;
+  update_lesson: any;
+  update_unit: any;
 };
 
 /**
@@ -376,6 +391,12 @@ export async function handleToolCall(
         break;
       case "get_lesson_prompts":
         result = await handleGetLessonPrompts(args as any, brainloopContext);
+        break;
+      case "update_lesson":
+        result = await handleUpdateLesson(args as any, brainloopContext);
+        break;
+      case "update_unit":
+        result = await handleUpdateUnit(args as any, brainloopContext);
         break;
       default:
         logger.error("Unsupported tool in switch statement", { toolName: request.params.name });

@@ -412,3 +412,77 @@ export async function handleGetLessonPrompts(
     throw new Error(`Failed to get lesson prompts: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
+
+/**
+ * Update an existing lesson
+ */
+export async function handleUpdateLesson(
+  args: {
+    lessonId: string;
+    title?: string;
+    content?: string;
+    videoUrl?: string;
+  },
+  context: BrainloopToolContext
+): Promise<CallToolResult> {
+  try {
+    logger.info(`✏️ Updating lesson ${args.lessonId}`);
+    const result = await context.brainloopService.updateLesson(args.lessonId, {
+      title: args.title,
+      content: args.content,
+      videoUrl: args.videoUrl,
+    });
+
+    return {
+      content: [{
+        type: 'text',
+        text: `✅ **Lesson Updated Successfully!**\n\n` +
+          `**Lesson ID:** ${result.lesson.id}\n` +
+          `**Title:** ${result.lesson.title}\n` +
+          `**Content Length:** ${result.lesson.content?.length || 0} characters\n` +
+          (result.lesson.videoUrl ? `**Video:** ${result.lesson.videoUrl}\n` : '') +
+          `**Last Updated:** ${new Date(result.lesson.updatedAt).toLocaleString()}\n\n` +
+          `💡 Changes saved successfully. The lesson content has been updated.`
+      }]
+    };
+  } catch (error) {
+    logger.error('Failed to update lesson', { error, lessonId: args.lessonId });
+    throw new Error(`Failed to update lesson: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
+ * Update an existing unit
+ */
+export async function handleUpdateUnit(
+  args: {
+    unitId: string;
+    title?: string;
+    description?: string;
+  },
+  context: BrainloopToolContext
+): Promise<CallToolResult> {
+  try {
+    logger.info(`✏️ Updating unit ${args.unitId}`);
+    const result = await context.brainloopService.updateUnit(args.unitId, {
+      title: args.title,
+      description: args.description,
+    });
+
+    return {
+      content: [{
+        type: 'text',
+        text: `✅ **Unit Updated Successfully!**\n\n` +
+          `**Unit ID:** ${result.unit.id}\n` +
+          `**Title:** ${result.unit.title}\n` +
+          `**Description:** ${result.unit.description}\n` +
+          `**Lesson Count:** ${result.unit._count?.lessons || 0}\n` +
+          `**Last Updated:** ${new Date(result.unit.updatedAt).toLocaleString()}\n\n` +
+          `💡 Changes saved successfully. The unit details have been updated.`
+      }]
+    };
+  } catch (error) {
+    logger.error('Failed to update unit', { error, unitId: args.unitId });
+    throw new Error(`Failed to update unit: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}

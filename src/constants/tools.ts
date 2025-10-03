@@ -20,6 +20,8 @@ import { createInteraction } from '../constants/tool/create-interaction.js';
 import { createPrompt } from '../constants/tool/create-prompt.js';
 import { createPromptsBatch } from '../constants/tool/create-prompts-batch.js';
 import { getLessonPrompts } from '../constants/tool/get-lesson-prompts.js';
+import { updateLesson } from '../constants/tool/update-lesson.js';
+import { updateUnit } from '../constants/tool/update-unit.js';
 import type { RedditConfigData } from '../types/config.js';
 
 /**
@@ -78,6 +80,8 @@ export const TOOLS: Tool[] = [
   createPrompt,
   createPromptsBatch,
   getLessonPrompts,
+  updateLesson,
+  updateUnit,
 ];
 
 /**

@@ -386,4 +386,31 @@ export class BrainloopService {
   async getLessonPrompts(lessonId: string): Promise<any> {
     return this.makeRequest<any>(`/mcp/lessons/${lessonId}/prompts`);
   }
+
+  /**
+   * Update an existing lesson
+   */
+  async updateLesson(lessonId: string, data: {
+    title?: string;
+    content?: string;
+    videoUrl?: string;
+  }): Promise<any> {
+    return this.makeRequest<any>(`/mcp/lessons/${lessonId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update an existing unit
+   */
+  async updateUnit(unitId: string, data: {
+    title?: string;
+    description?: string;
+  }): Promise<any> {
+    return this.makeRequest<any>(`/mcp/units/${unitId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
 }
