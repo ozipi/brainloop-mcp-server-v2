@@ -5,7 +5,7 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 export const expandBrainloop: Tool = {
   name: "expand_brainloop",
-  description: "Expand an existing brainloop by adding more lessons, units, or topics. Use this to grow your brainloop with additional learning content.",
+  description: "Expand an existing brainloop by adding ONE lesson at a time. IMPORTANT: Add content incrementally - create one unit with ONE lesson, verify it was added successfully by checking the response, then add the next lesson to the same unit or a new unit. This lesson-by-lesson approach ensures quality, allows for adjustments, and prevents duplicate work if a failure occurs.",
   inputSchema: {
     type: "object",
     properties: {

@@ -82,11 +82,14 @@ Brainloop: "Machine Learning Fundamentals"
 \`\`\`
 
 ### 3. **Best Practices**
-- **Start simple**: Begin with 3-5 units
+- **Start simple**: Begin with 3-5 units (structure only, no lessons yet)
+- **ONE LESSON AT A TIME**: Use \`create_brainloop\` to create structure, then \`expand_brainloop\` to add ONE lesson at a time
+- **VERIFY EACH LESSON**: After adding each lesson, check the response to confirm it was created successfully before adding the next one
+- **Prevent duplicate work**: This lesson-by-lesson verification prevents creating duplicate content if a failure occurs mid-process
 - **Progressive complexity**: Each unit builds on previous ones
 - **Interactive learning**: ALWAYS include questions and exercises in lessons
 - **Clear learning paths**: Show progression clearly
-- **Iterative expansion**: Start small, expand later with \`expand_brainloop\`
+- **Quality over speed**: Take time to verify each lesson addition rather than batch-creating multiple lessons
 
 ### 4. **Essential Components for Every Lesson**
 Every lesson MUST include:
@@ -103,9 +106,11 @@ Every lesson MUST include:
 Introduction, Data Types, Control Flow, Functions, and OOP"
 \`\`\`
 
-### Expand Existing Brainloop
+### Expand Existing Brainloop (ONE LESSON AT A TIME)
 \`\`\`
-"Expand my Python brainloop with advanced topics like decorators and generators"
+"Add one lesson about decorators to the Functions unit in my Python brainloop"
+"Add another lesson about generators to the same unit"
+[Wait for confirmation after each lesson before adding the next]
 \`\`\`
 
 ### Track Progress
@@ -271,12 +276,22 @@ Key takeaways and next steps
 
 ## Expanding Brainloops
 
-Start with core content, then expand:
-1. Create initial brainloop with main topics
-2. Test with learners
-3. Identify gaps or areas needing depth
-4. Use \`expand_brainloop\` to add content
-5. Iterate based on feedback`,
+**CRITICAL: Add ONE LESSON at a time, verify success, then continue**
+
+Incremental expansion workflow:
+1. Create initial brainloop structure with \`create_brainloop\` (topics only)
+2. Use \`expand_brainloop\` to add ONE lesson
+3. Check response to verify the lesson was created successfully
+4. If successful, add the next lesson
+5. If failed, troubleshoot before proceeding
+6. Repeat until unit is complete
+7. Move to next unit
+
+**Why lesson-by-lesson?**
+- Prevents duplicate work if errors occur
+- Allows quality verification at each step
+- Enables adjustments based on feedback
+- Catches issues early before compounding`,
 
   BRAINLOOP_TEMPLATE: `{
   "title": "Your Brainloop Title",
