@@ -27,6 +27,7 @@ import {
   handleGetBrainloop,
   handleExpandBrainloop,
   handleBrainloopProgress,
+  handleGetUnitLessons,
   handleCreateInteraction,
   handleCreatePrompt,
   handleCreatePromptsBatch,
@@ -113,6 +114,9 @@ const ToolSchemas = {
     title: z.string().optional().describe("New unit title"),
     description: z.string().optional().describe("New unit description"),
   }),
+  get_unit_lessons: z.object({
+    unitId: z.string().min(1).describe("The ID of the unit"),
+  }),
   search_reddit: z.object({
     query: z.string().min(1).max(500).describe("Search query"),
     subreddit: z.string().optional().describe("Specific subreddit to search (optional)"),
@@ -198,6 +202,7 @@ type ToolArgs = {
   get_brainloop: any;
   expand_brainloop: any;
   brainloop_progress: any;
+  get_unit_lessons: any;
   create_interaction: any;
   create_prompt: any;
   create_prompts_batch: any;
@@ -379,6 +384,9 @@ export async function handleToolCall(
         break;
       case "brainloop_progress":
         result = await handleBrainloopProgress(args as any, brainloopContext);
+        break;
+      case "get_unit_lessons":
+        result = await handleGetUnitLessons(args as any, brainloopContext);
         break;
       case "create_interaction":
         result = await handleCreateInteraction(args as any, brainloopContext);

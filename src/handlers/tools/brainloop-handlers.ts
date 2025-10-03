@@ -486,3 +486,46 @@ export async function handleUpdateUnit(
     throw new Error(`Failed to update unit: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
+
+/**
+ * Get all lessons for a unit
+ */
+export async function handleGetUnitLessons(
+  args: { unitId: string },
+  context: BrainloopToolContext
+): Promise<CallToolResult> {
+  try {
+    logger.info(`📚 Getting lessons for unit ${args.unitId}`);
+    const lessons = await context.brainloopService.getUnitLessons(args.unitId);
+
+    if (lessons.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `📭 **No lessons found in this unit**\n\n` +
+            `**Unit ID:** ${args.unitId}\n\n` +
+            `💡 Use \`expand_brainloop\` to add lessons to this unit.`
+        }]
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: `📚 **Unit Lessons** (${lessons.length} total)\n\n` +
+          `**Lessons:**\n` +
+          lessons.map((lesson, i) =>
+            `${i + 1}. **${lesson.title}**\n` +
+            `   Lesson ID: ${lesson.id}\n` +
+            `   Order: ${lesson.order}\n` +
+            `   Content Length: ${lesson.content?.length || 0} characters\n` +
+            (lesson.videoUrl ? `   Video: ${lesson.videoUrl}\n` : '')
+          ).join('\n') +
+          `\n\n💡 Use these lesson IDs to create interactions and add questions.`
+      }]
+    };
+  } catch (error) {
+    logger.error('Failed to get unit lessons', { error, unitId: args.unitId });
+    throw new Error(`Failed to get unit lessons: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}

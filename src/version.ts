@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Read version from package.json
-let version = '3.1.0';
+let version = '3.2.0';
 try {
   const packageJsonPath = join(__dirname, '..', 'package.json');
   const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
@@ -33,6 +33,7 @@ export function getVersionInfo() {
       'Prompts & Interactions',
       'Lesson ID Visibility',
       'Token Auto-Refresh',
+      'Get Unit Lessons',
     ],
   };
 }

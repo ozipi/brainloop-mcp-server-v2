@@ -22,6 +22,7 @@ import { createPromptsBatch } from '../constants/tool/create-prompts-batch.js';
 import { getLessonPrompts } from '../constants/tool/get-lesson-prompts.js';
 import { updateLesson } from '../constants/tool/update-lesson.js';
 import { updateUnit } from '../constants/tool/update-unit.js';
+import { getUnitLessons } from '../constants/tool/get-unit-lessons.js';
 import type { RedditConfigData } from '../types/config.js';
 
 /**
@@ -76,6 +77,7 @@ export const TOOLS: Tool[] = [
   getBrainloop,
   expandBrainloop,
   brainloopProgress,
+  getUnitLessons,
   createInteraction,
   createPrompt,
   createPromptsBatch,

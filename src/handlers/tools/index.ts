@@ -40,6 +40,7 @@ export {
   handleGetBrainloop,
   handleExpandBrainloop,
   handleBrainloopProgress,
+  handleGetUnitLessons,
   handleCreateInteraction,
   handleCreatePrompt,
   handleCreatePromptsBatch,
