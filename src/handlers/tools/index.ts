@@ -9,6 +9,7 @@ export * from './sampling-example.js';
 export * from './structured-data-example.js';
 export * from './logging.js';
 export * from './validation-example.js';
+export * from './brainloop-handlers.js';
 
 export type {
   ToolHandler,
@@ -33,3 +34,14 @@ export { handleSamplingExample } from './sampling-example.js';
 export { handleStructuredDataExample } from './structured-data-example.js';
 export { handleLogging } from './logging.js';
 export { handleValidationExample } from './validation-example.js';
+export {
+  handleCreateBrainloop,
+  handleViewBrainloops,
+  handleGetBrainloop,
+  handleExpandBrainloop,
+  handleBrainloopProgress,
+  handleCreateInteraction,
+  handleCreatePrompt,
+  handleCreatePromptsBatch,
+  handleGetLessonPrompts
+} from './brainloop-handlers.js';

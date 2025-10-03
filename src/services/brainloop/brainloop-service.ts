@@ -321,4 +321,69 @@ export class BrainloopService {
       body: JSON.stringify(lessons),
     });
   }
+
+  /**
+   * Create an interaction for a lesson
+   */
+  async createInteraction(lessonId: string): Promise<{ id: string; lessonId: string; type: string }> {
+    return this.makeRequest<{ id: string; lessonId: string; type: string }>(`/mcp/lessons/${lessonId}/interaction`, {
+      method: 'POST',
+    });
+  }
+
+  /**
+   * Create a single prompt for an interaction
+   */
+  async createPrompt(promptData: {
+    interactionId: string;
+    question: string;
+    type: string;
+    options?: string[];
+    answer?: any;
+    explanation?: string;
+    codeLanguage?: string;
+    codeStarterCode?: string;
+    codeExpectedOutput?: string;
+    codeTestCases?: any;
+    codeTimeLimit?: number;
+    codeMemoryLimit?: number;
+    componentType?: string;
+    componentConfig?: any;
+    componentAnswer?: any;
+  }): Promise<any> {
+    return this.makeRequest<any>('/mcp/prompts', {
+      method: 'POST',
+      body: JSON.stringify(promptData),
+    });
+  }
+
+  /**
+   * Create multiple prompts in batch
+   */
+  async createPromptsBatch(interactionId: string, prompts: Array<{
+    question: string;
+    type: string;
+    options?: string[];
+    answer?: any;
+    explanation?: string;
+    codeLanguage?: string;
+    codeStarterCode?: string;
+    componentType?: string;
+    componentConfig?: any;
+  }>): Promise<any> {
+    return this.makeRequest<any>('/mcp/prompts/batch', {
+      method: 'POST',
+      body: JSON.stringify({
+        interactionId,
+        prompts,
+      }),
+    });
+  }
+
+  /**
+   * Get all prompts for a lesson
+   */
+  async getLessonPrompts(lessonId: string): Promise<any> {
+    return this.makeRequest<any>(`/mcp/lessons/${lessonId}/prompts`);
+  }
 }

@@ -27,6 +27,10 @@ import {
   handleGetBrainloop,
   handleExpandBrainloop,
   handleBrainloopProgress,
+  handleCreateInteraction,
+  handleCreatePrompt,
+  handleCreatePromptsBatch,
+  handleGetLessonPrompts,
 } from './tools/brainloop-handlers.js';
 
 /**
@@ -57,6 +61,44 @@ const ToolSchemas = {
   }),
   brainloop_progress: z.object({
     brainloopId: z.string().optional().describe("Specific brainloop ID (optional)"),
+  }),
+  create_interaction: z.object({
+    lessonId: z.string().min(1).describe("The ID of the lesson"),
+    type: z.string().optional().describe("Interaction type (assessment, exercise, reflection)"),
+  }),
+  create_prompt: z.object({
+    interactionId: z.string().min(1).describe("The ID of the interaction"),
+    question: z.string().min(1).describe("The question text"),
+    type: z.string().min(1).describe("Prompt type (multiple-choice, single-choice, short-answer, etc.)"),
+    options: z.array(z.string()).optional().describe("Options for choice questions"),
+    answer: z.any().optional().describe("The correct answer"),
+    explanation: z.string().optional().describe("Explanation of the answer"),
+    codeLanguage: z.string().optional().describe("Programming language for code questions"),
+    codeStarterCode: z.string().optional().describe("Starter code for code questions"),
+    codeExpectedOutput: z.string().optional().describe("Expected output for code questions"),
+    codeTestCases: z.any().optional().describe("Test cases for code questions"),
+    codeTimeLimit: z.number().optional().describe("Time limit for code execution"),
+    codeMemoryLimit: z.number().optional().describe("Memory limit for code execution"),
+    componentType: z.string().optional().describe("Interactive component type"),
+    componentConfig: z.any().optional().describe("Component configuration"),
+    componentAnswer: z.any().optional().describe("Expected component answer"),
+  }),
+  create_prompts_batch: z.object({
+    interactionId: z.string().min(1).describe("The ID of the interaction"),
+    prompts: z.array(z.object({
+      question: z.string().min(1).describe("The question text"),
+      type: z.string().min(1).describe("Prompt type"),
+      options: z.array(z.string()).optional().describe("Options for choice questions"),
+      answer: z.any().optional().describe("The correct answer"),
+      explanation: z.string().optional().describe("Explanation of the answer"),
+      codeLanguage: z.string().optional().describe("Programming language for code questions"),
+      codeStarterCode: z.string().optional().describe("Starter code for code questions"),
+      componentType: z.string().optional().describe("Interactive component type"),
+      componentConfig: z.any().optional().describe("Component configuration"),
+    })).min(1).describe("Array of prompts to create"),
+  }),
+  get_lesson_prompts: z.object({
+    lessonId: z.string().min(1).describe("The ID of the lesson"),
   }),
   search_reddit: z.object({
     query: z.string().min(1).max(500).describe("Search query"),
@@ -143,6 +185,10 @@ type ToolArgs = {
   get_brainloop: any;
   expand_brainloop: any;
   brainloop_progress: any;
+  create_interaction: any;
+  create_prompt: any;
+  create_prompts_batch: any;
+  get_lesson_prompts: any;
 };
 
 /**
@@ -318,6 +364,18 @@ export async function handleToolCall(
         break;
       case "brainloop_progress":
         result = await handleBrainloopProgress(args as any, brainloopContext);
+        break;
+      case "create_interaction":
+        result = await handleCreateInteraction(args as any, brainloopContext);
+        break;
+      case "create_prompt":
+        result = await handleCreatePrompt(args as any, brainloopContext);
+        break;
+      case "create_prompts_batch":
+        result = await handleCreatePromptsBatch(args as any, brainloopContext);
+        break;
+      case "get_lesson_prompts":
+        result = await handleGetLessonPrompts(args as any, brainloopContext);
         break;
       default:
         logger.error("Unsupported tool in switch statement", { toolName: request.params.name });

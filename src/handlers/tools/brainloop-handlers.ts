@@ -250,3 +250,164 @@ export async function handleBrainloopProgress(
     throw new Error(`Failed to get brainloop progress: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
+
+/**
+ * Create an interaction for a lesson
+ */
+export async function handleCreateInteraction(
+  args: { lessonId: string; type?: string },
+  context: BrainloopToolContext
+): Promise<CallToolResult> {
+  try {
+    logger.info(`🎯 Creating interaction for lesson ${args.lessonId}`);
+    const result = await context.brainloopService.createInteraction(args.lessonId);
+
+    return {
+      content: [{
+        type: 'text',
+        text: `✅ **Interaction Created Successfully!**\n\n` +
+          `**Interaction ID:** ${result.id}\n` +
+          `**Lesson ID:** ${result.lessonId}\n` +
+          `**Type:** ${result.type}\n\n` +
+          `💡 You can now add prompts (questions/exercises) to this interaction using \`create_prompt\` or \`create_prompts_batch\`.`
+      }]
+    };
+  } catch (error) {
+    logger.error('Failed to create interaction', { error, lessonId: args.lessonId });
+    throw new Error(`Failed to create interaction: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
+ * Create a single prompt for an interaction
+ */
+export async function handleCreatePrompt(
+  args: {
+    interactionId: string;
+    question: string;
+    type: string;
+    options?: string[];
+    answer?: any;
+    explanation?: string;
+    codeLanguage?: string;
+    codeStarterCode?: string;
+    codeExpectedOutput?: string;
+    codeTestCases?: any;
+    codeTimeLimit?: number;
+    codeMemoryLimit?: number;
+    componentType?: string;
+    componentConfig?: any;
+    componentAnswer?: any;
+  },
+  context: BrainloopToolContext
+): Promise<CallToolResult> {
+  try {
+    logger.info(`📝 Creating prompt for interaction ${args.interactionId}`);
+    const result = await context.brainloopService.createPrompt(args);
+
+    return {
+      content: [{
+        type: 'text',
+        text: `✅ **Prompt Created Successfully!**\n\n` +
+          `**Prompt ID:** ${result.prompt.id}\n` +
+          `**Question:** ${result.prompt.question}\n` +
+          `**Type:** ${result.prompt.type}\n` +
+          `**Interaction ID:** ${result.prompt.interactionId}\n\n` +
+          `📊 **Lesson now has ${result.lesson.promptCount} prompt(s)**`
+      }]
+    };
+  } catch (error) {
+    logger.error('Failed to create prompt', { error, interactionId: args.interactionId });
+    throw new Error(`Failed to create prompt: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
+ * Create multiple prompts for an interaction
+ */
+export async function handleCreatePromptsBatch(
+  args: {
+    interactionId: string;
+    prompts: Array<{
+      question: string;
+      type: string;
+      options?: string[];
+      answer?: any;
+      explanation?: string;
+      codeLanguage?: string;
+      codeStarterCode?: string;
+      componentType?: string;
+      componentConfig?: any;
+    }>;
+  },
+  context: BrainloopToolContext
+): Promise<CallToolResult> {
+  try {
+    logger.info(`📝 Creating ${args.prompts.length} prompts for interaction ${args.interactionId}`);
+    const result = await context.brainloopService.createPromptsBatch(args.interactionId, args.prompts);
+
+    return {
+      content: [{
+        type: 'text',
+        text: `✅ **${result.metadata.totalCreated} Prompts Created Successfully!**\n\n` +
+          `**Interaction ID:** ${result.interaction.id}\n` +
+          `**Lesson:** ${result.lesson.title}\n` +
+          `**Total Prompts Now:** ${result.metadata.totalPromptsNow}\n\n` +
+          `**Created Prompts:**\n` +
+          result.prompts.map((p: any, i: number) =>
+            `${i + 1}. ${p.question.substring(0, 60)}${p.question.length > 60 ? '...' : ''} (${p.type})`
+          ).join('\n')
+      }]
+    };
+  } catch (error) {
+    logger.error('Failed to create prompts batch', { error, interactionId: args.interactionId });
+    throw new Error(`Failed to create prompts batch: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
+ * Get all prompts for a lesson
+ */
+export async function handleGetLessonPrompts(
+  args: { lessonId: string },
+  context: BrainloopToolContext
+): Promise<CallToolResult> {
+  try {
+    logger.info(`📚 Getting prompts for lesson ${args.lessonId}`);
+    const result = await context.brainloopService.getLessonPrompts(args.lessonId);
+
+    if (result.metadata.totalPrompts === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `📭 **No prompts found for this lesson**\n\n` +
+            `**Lesson:** ${result.lesson.title}\n` +
+            `**Has Interaction:** ${result.lesson.hasInteraction ? 'Yes' : 'No'}\n\n` +
+            (result.metadata.needsInteraction
+              ? `💡 Create an interaction first with \`create_interaction\``
+              : `💡 Add prompts with \`create_prompt\` or \`create_prompts_batch\``)
+        }]
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: `📚 **Lesson Prompts** (${result.metadata.totalPrompts} total)\n\n` +
+          `**Lesson:** ${result.lesson.title}\n` +
+          `**Interaction ID:** ${result.interaction.id}\n\n` +
+          `**Prompts:**\n` +
+          result.prompts.map((p: any, i: number) =>
+            `${i + 1}. **${p.question}**\n` +
+            `   Type: ${p.type}\n` +
+            `   ID: ${p.id}\n` +
+            (p.options ? `   Options: ${p.options.length}\n` : '') +
+            (p.explanation ? `   Has explanation: Yes\n` : '')
+          ).join('\n')
+      }]
+    };
+  } catch (error) {
+    logger.error('Failed to get lesson prompts', { error, lessonId: args.lessonId });
+    throw new Error(`Failed to get lesson prompts: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}

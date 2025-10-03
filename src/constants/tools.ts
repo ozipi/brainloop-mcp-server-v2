@@ -16,6 +16,10 @@ import { viewBrainloops } from '../constants/tool/view-brainloops.js';
 import { expandBrainloop } from '../constants/tool/expand-brainloop.js';
 import { brainloopProgress } from '../constants/tool/brainloop-progress.js';
 import { getBrainloop } from '../constants/tool/get-brainloop.js';
+import { createInteraction } from '../constants/tool/create-interaction.js';
+import { createPrompt } from '../constants/tool/create-prompt.js';
+import { createPromptsBatch } from '../constants/tool/create-prompts-batch.js';
+import { getLessonPrompts } from '../constants/tool/get-lesson-prompts.js';
 import type { RedditConfigData } from '../types/config.js';
 
 /**
@@ -54,6 +58,10 @@ export const TOOL_RESPONSE_MESSAGES = {
  * - `get_brainloop`: Get detailed information about a specific brainloop
  * - `expand_brainloop`: Add more content to an existing brainloop
  * - `brainloop_progress`: Track your learning progress
+ * - `create_interaction`: Create an interaction container for lesson questions
+ * - `create_prompt`: Create a single question/exercise for a lesson
+ * - `create_prompts_batch`: Create multiple questions at once
+ * - `get_lesson_prompts`: Get all questions for a lesson
  *
  * A "brainloop" is a complete learning experience - a structured course
  * with units and lessons designed for effective learning.
@@ -66,6 +74,10 @@ export const TOOLS: Tool[] = [
   getBrainloop,
   expandBrainloop,
   brainloopProgress,
+  createInteraction,
+  createPrompt,
+  createPromptsBatch,
+  getLessonPrompts,
 ];
 
 /**
