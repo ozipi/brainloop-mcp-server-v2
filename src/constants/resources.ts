@@ -327,6 +327,7 @@ Key takeaways and next steps
 - > Blockquotes for important notes
 - Lists for steps or key points
 - Focus on teaching content, NOT questions (questions go in interactions)
+- **MDX Components**: Use custom interactive components when appropriate (see MDX Components section below)
 
 **For Interactions:**
 - **Always create 5 interactions after lesson is verified** - This is NON-NEGOTIABLE (unless user specifies different)
@@ -363,7 +364,187 @@ Incremental expansion workflow:
 - Provides comprehensive assessment of understanding
 - Enables adjustments based on feedback
 - Catches issues early before compounding
-- Maintains clean state even if process is interrupted`,
+- Maintains clean state even if process is interrupted
+
+## MDX Components Available
+
+The BRAINLOOP platform supports custom interactive MDX components that can be embedded directly in lesson content. These components provide rich, interactive learning experiences beyond standard markdown.
+
+### Available Components:
+
+#### 1. HebrewCircle (Fully Implemented)
+Interactive Hebrew letters arranged in mystical circles for Kabbalah and Hebrew learning.
+
+**Usage:**
+\`\`\`mdx
+<HebrewCircle
+  mode="select-letter"
+  targetLetter="א"
+  instruction="Find the letter Aleph"
+  size={400}
+  showTooltips={true}
+  showGematria={true}
+/>
+\`\`\`
+
+**Properties:**
+- \`mode\`: "select-letter" | "identify-ring" | "find-sequence"
+- \`targetLetter\`: Hebrew letter to find (e.g., "א", "ב")
+- \`instruction\`: Text instruction for the user
+- \`size\`: Circle size in pixels (200-800, default 400)
+- \`backgroundColor\`: Hex color for background
+- \`showTooltips\`: Show letter names on hover
+- \`showGematria\`: Show numerical values
+- \`showSectionHighlight\`: Highlight sections
+- \`mysticalMode\`: Enable mystical styling
+- \`respectfulMode\`: Handle divine names respectfully
+
+**Use cases:**
+- Hebrew alphabet learning
+- Kabbalah studies
+- Letter recognition exercises
+- Gematria calculations
+
+#### 2. AlphabetComponent (Fully Implemented)
+Interactive alphabet selection for different writing systems.
+
+**Usage:**
+\`\`\`mdx
+<AlphabetComponent
+  language="hebrew"
+  letters={["א", "ב", "ג", "ד", "ה"]}
+  layout="grid"
+  showNames={true}
+  gridColumns={5}
+/>
+\`\`\`
+
+**Properties:**
+- \`language\`: "hebrew" | "arabic" | "greek" | "cyrillic"
+- \`letters\`: Array of letters to display
+- \`layout\`: "grid" | "linear"
+- \`showNames\`: Show letter names
+- \`gridColumns\`: Number of columns (1-10) for grid layout
+
+**Use cases:**
+- Alphabet learning for any supported language
+- Letter selection exercises
+- Writing system comparisons
+
+#### 3. WorldMap (Planned - Placeholder)
+Interactive world map for geography questions.
+
+**Future Usage:**
+\`\`\`mdx
+<WorldMap
+  region="europe"
+  countries={["France", "Germany", "Italy"]}
+  showLabels={true}
+  zoomLevel={5}
+/>
+\`\`\`
+
+**Use cases:**
+- Geography lessons
+- Country identification
+- Geopolitical studies
+
+#### 4. PianoKeyboard (Planned - Placeholder)
+Interactive piano keyboard for music theory.
+
+**Future Usage:**
+\`\`\`mdx
+<PianoKeyboard
+  startNote="C4"
+  endNote="C5"
+  showLabels={true}
+  playSound={true}
+/>
+\`\`\`
+
+**Use cases:**
+- Music theory
+- Note identification
+- Chord learning
+
+#### 5. DiagramSelector (Planned - Placeholder)
+Interactive diagram with selectable elements.
+
+**Future Usage:**
+\`\`\`mdx
+<DiagramSelector
+  diagramType="cell-structure"
+  elements={[
+    { id: "nucleus", label: "Nucleus", x: 50, y: 50 },
+    { id: "membrane", label: "Cell Membrane", x: 100, y: 100 }
+  ]}
+  showConnections={true}
+/>
+\`\`\`
+
+**Use cases:**
+- Biology diagrams
+- System architecture
+- Process flows
+
+#### 6. Timeline (Planned - Placeholder)
+Interactive timeline for historical events.
+
+**Future Usage:**
+\`\`\`mdx
+<Timeline
+  events={[
+    { id: "1", date: "1776", title: "Independence", description: "..." },
+    { id: "2", date: "1789", title: "Constitution", description: "..." }
+  ]}
+/>
+\`\`\`
+
+**Use cases:**
+- History lessons
+- Project timelines
+- Event sequencing
+
+#### 7. PeriodicTable (Planned - Placeholder)
+Interactive periodic table for chemistry.
+
+**Future Usage:**
+\`\`\`mdx
+<PeriodicTable
+  elements={["H", "He", "Li", "Be"]}
+  showDetails={true}
+  highlightGroups={true}
+/>
+\`\`\`
+
+**Use cases:**
+- Chemistry education
+- Element properties
+- Periodic trends
+
+### When to Use MDX Components:
+
+- **Enhanced engagement**: When standard text/images aren't sufficient
+- **Interactive learning**: For hands-on practice within lessons
+- **Visual learning**: For topics that benefit from interactive visualization
+- **Language learning**: Hebrew, Arabic, Greek, Cyrillic alphabets
+- **Subject-specific needs**: Music, geography, chemistry, history
+
+### Important Notes:
+
+1. **Currently implemented**: HebrewCircle and AlphabetComponent
+2. **Planned components**: Will be implemented in future phases
+3. **MDX syntax**: Components use JSX-like syntax in markdown
+4. **Performance**: Components are optimized for smooth interaction
+5. **Accessibility**: All components support keyboard navigation
+
+### MDX Component Best Practices:
+
+- Use components to **enhance** learning, not replace clear explanations
+- Place components **after** introducing the concept in text
+- Provide **clear instructions** for how to interact
+- Keep component configurations **simple** and focused
+- Test components to ensure they **work as expected**`,
 
   BRAINLOOP_TEMPLATE: `{
   "title": "Your Brainloop Title",
