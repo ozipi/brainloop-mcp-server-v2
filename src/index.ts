@@ -25,6 +25,15 @@ dotenv.config();
 
 import { startServer } from './server.js';
 import { CONFIG } from './server/config.js';
+import { getVersionInfo } from './version.js';
+
+// Log version information on startup
+const versionInfo = getVersionInfo();
+console.log('\n='.repeat(60));
+console.log(`🚀 Starting ${versionInfo.name} v${versionInfo.version}`);
+console.log(`📅 Build Date: ${versionInfo.buildDate}`);
+console.log(`✨ Features: ${versionInfo.features.join(', ')}`);
+console.log('='.repeat(60) + '\n');
 
 // Start the server
 const port = parseInt(CONFIG.PORT, 10);
