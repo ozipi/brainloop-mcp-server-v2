@@ -195,8 +195,9 @@ export async function handleExpandBrainloop(
             `**${unit.title}**\n` +
             `  Unit ID: ${unit.id}\n` +
             `  Lessons: ${lessons.length}\n` +
-            lessons.map((l, i) => `  ${i + 1}. ${l.title}`).join('\n')
-          ).join('\n\n')
+            lessons.map((l, i) => `  ${i + 1}. ${l.title} (ID: ${l.id})`).join('\n')
+          ).join('\n\n') +
+          `\n\n💡 **Next steps:** You can now create interactions and add questions to these lessons using their IDs.`
       }]
     };
   } catch (error) {
