@@ -91,6 +91,8 @@ interface BrainloopAuthConfig {
   accessToken: string;
   /** User ID for API requests */
   userId: string;
+  /** Optional callback to refresh access token when it expires */
+  refreshTokenCallback?: () => Promise<string>;
 }
 
 /**
@@ -98,22 +100,24 @@ interface BrainloopAuthConfig {
  */
 export class BrainloopService {
   private readonly baseUrl: string;
-  private readonly accessToken: string;
+  private accessToken: string;
   private readonly userId: string;
+  private readonly refreshTokenCallback?: () => Promise<string>;
 
   constructor(config: BrainloopAuthConfig) {
     this.baseUrl = CONFIG.BRAINLOOP_API_URL;
     this.accessToken = config.accessToken;
     this.userId = config.userId;
+    this.refreshTokenCallback = config.refreshTokenCallback;
 
     // Log initialization for debugging
     logger.debug(`Initialized BRAINLOOP service for user: ${this.userId}`);
   }
 
   /**
-   * Make authenticated request to BRAINLOOP API
+   * Make authenticated request to BRAINLOOP API with automatic token refresh
    */
-  private async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  private async makeRequest<T>(endpoint: string, options: RequestInit = {}, isRetry = false): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
     try {
@@ -127,6 +131,33 @@ export class BrainloopService {
           ...options.headers,
         },
       });
+
+      // Handle 401 Unauthorized - token might be expired
+      if (response.status === 401 && !isRetry && this.refreshTokenCallback) {
+        const errorText = await response.text();
+
+        // Check if it's a token expiration error
+        if (errorText.includes('Invalid access token') || errorText.includes('expired')) {
+          logger.info('Access token expired, attempting refresh', { userId: this.userId });
+
+          try {
+            // Refresh the token using the callback
+            const newAccessToken = await this.refreshTokenCallback();
+            this.accessToken = newAccessToken;
+
+            logger.info('Access token refreshed successfully', { userId: this.userId });
+
+            // Retry the request with the new token (pass isRetry=true to prevent infinite loop)
+            return await this.makeRequest<T>(endpoint, options, true);
+          } catch (refreshError) {
+            logger.error('Failed to refresh access token', {
+              userId: this.userId,
+              error: refreshError instanceof Error ? refreshError.message : String(refreshError),
+            });
+            throw new Error('Authentication failed: Unable to refresh access token');
+          }
+        }
+      }
 
       if (!response.ok) {
         const errorText = await response.text();

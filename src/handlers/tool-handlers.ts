@@ -294,6 +294,7 @@ export async function handleToolCall(
     const brainloopService = new BrainloopService({
       accessToken: credentials.accessToken,
       userId: credentials.userId,
+      refreshTokenCallback: context.refreshTokenCallback,
     });
 
     const brainloopContext = {

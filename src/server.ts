@@ -57,9 +57,10 @@ export async function createApp(): Promise<express.Application> {
     ...CONFIG,
     validRedirectUris: VALID_REDIRECT_URIS,
   });
-  
+
   // Initialize MCP handler for protocol implementation with proper session support
-  const mcpHandler = new MCPHandler();
+  // Pass OAuth provider for token refresh functionality
+  const mcpHandler = new MCPHandler(oauthProvider);
   
   // Set global instance for notifications
   setMCPHandlerInstance(mcpHandler);

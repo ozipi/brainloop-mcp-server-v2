@@ -778,15 +778,64 @@ export class OAuthProvider {
   }
 
   /**
-   * Exchanges Reddit authorization code for access tokens
+   * Refreshes an expired Google access token using refresh token
    *
    * @remarks
-   * Part of MCP OAuth Step 6: Reddit OAuth Callback
-   * Uses Reddit's token endpoint with basic auth
+   * Called when Google access token expires (after ~1 hour).
+   * Uses the refresh_token to obtain a new access_token from Google.
    *
-   * @param code - Authorization code from Reddit
+   * @param refreshToken - Google OAuth refresh token
+   * @returns Object containing new access_token and potentially new refresh_token
+   * @throws Error if refresh fails
+   */
+  async refreshGoogleAccessToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+    try {
+      const response = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          client_id: this.config.GOOGLE_CLIENT_ID,
+          client_secret: this.config.GOOGLE_CLIENT_SECRET,
+          refresh_token: refreshToken,
+          grant_type: "refresh_token",
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Google token refresh failed: ${response.status} - ${error}`);
+      }
+
+      const data = await response.json() as {
+        access_token: string;
+        refresh_token?: string;
+        expires_in?: number;
+      };
+
+      // Google may return a new refresh token, or reuse the old one
+      return {
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token || refreshToken,
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to refresh Google access token: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  /**
+   * Exchanges Google authorization code for access tokens
+   *
+   * @remarks
+   * Part of MCP OAuth Step 6: Google OAuth Callback
+   * Uses Google's token endpoint with client credentials
+   *
+   * @param code - Authorization code from Google
    * @param actualCallbackUri - Redirect URI used in initial request
-   * @returns Reddit token response with access_token and refresh_token
+   * @returns Google token response with access_token and refresh_token
    */
   private async exchangeGoogleCode(code: string, actualCallbackUri: string): Promise<any> {
     const response = await fetch("https://oauth2.googleapis.com/token", {

@@ -30,7 +30,7 @@ import { handleListResources, handleResourceCall } from "../handlers/resource-ha
 import { logger } from "../utils/logger.js";
 import { rateLimitMiddleware, validateProtocolVersion, requestSizeLimit } from "./middleware.js";
 import type { RedditAuthInfo } from "../types/request-context.js";
-import type { AuthenticatedRequest } from "./oauth.js";
+import type { AuthenticatedRequest, OAuthProvider } from "./oauth.js";
 
 // Per-session auth context storage
 interface SessionAuth {
@@ -63,12 +63,14 @@ export interface IMCPHandler {
  */
 export class MCPHandler implements IMCPHandler {
   private sessions = new Map<string, SessionInfo>();
+  private oauthProvider?: OAuthProvider;
 
   // Session cleanup interval (clear sessions older than 1 hour)
   private cleanupInterval: NodeJS.Timeout;
   private readonly SESSION_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour
 
-  constructor() {
+  constructor(oauthProvider?: OAuthProvider) {
+    this.oauthProvider = oauthProvider;
     this.cleanupInterval = setInterval(
       () => {
         this.cleanupOldSessions();
@@ -90,7 +92,7 @@ export class MCPHandler implements IMCPHandler {
       return handleListTools(request);
     });
 
-    server.setRequestHandler(CallToolRequestSchema, (request) => {
+    server.setRequestHandler(CallToolRequestSchema, async (request) => {
       logger.debug(`🔧 [${sessionId}] Calling tool: ${request.params.name}`);
 
       if (!sessionAuth) {
@@ -108,7 +110,35 @@ export class MCPHandler implements IMCPHandler {
         },
       };
 
-      return handleToolCall(request, { sessionId, authInfo });
+      // Create token refresh callback if OAuth provider is available
+      const refreshTokenCallback = this.oauthProvider && sessionAuth.refreshToken
+        ? async () => {
+            try {
+              logger.info(`Refreshing Google access token for session ${sessionId}`);
+              const newTokens = await this.oauthProvider!.refreshGoogleAccessToken(sessionAuth.refreshToken);
+
+              // Update session with new tokens
+              sessionAuth.accessToken = newTokens.accessToken;
+              sessionAuth.refreshToken = newTokens.refreshToken;
+
+              // Update session info
+              const session = this.sessions.get(sessionId);
+              if (session) {
+                session.auth = sessionAuth;
+              }
+
+              logger.info(`Successfully refreshed token for session ${sessionId}`);
+              return newTokens.accessToken;
+            } catch (error) {
+              logger.error(`Failed to refresh token for session ${sessionId}`, {
+                error: error instanceof Error ? error.message : String(error),
+              });
+              throw error;
+            }
+          }
+        : undefined;
+
+      return handleToolCall(request, { sessionId, authInfo, refreshTokenCallback });
     });
 
     // Prompts

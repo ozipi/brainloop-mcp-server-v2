@@ -49,20 +49,21 @@ export interface RedditAuthInfo extends AuthInfo {
 
 /**
  * Context passed from MCP server to tool handler functions.
- * 
+ *
  * @remarks
  * This context provides all necessary information for handlers to:
  * - Authenticate Reddit API requests
  * - Track session state
  * - Access user-specific data
- * 
+ * - Refresh expired tokens
+ *
  * @example
  * ```typescript
  * export async function handleTool(
  *   args: ToolArgs,
  *   context: MCPToolContext
  * ): Promise<ToolResult> {
- *   const { sessionId, authInfo } = context;
+ *   const { sessionId, authInfo, refreshTokenCallback } = context;
  *   const userId = authInfo.extra?.userId;
  *   // Use context for Reddit API calls
  * }
@@ -74,11 +75,17 @@ export interface MCPToolContext {
    * Used to track per-session state and route notifications.
    */
   sessionId: string;
-  
+
   /**
    * Authentication information including Reddit OAuth tokens.
    * Contains user identity and API credentials.
    */
   authInfo: RedditAuthInfo;
+
+  /**
+   * Optional callback to refresh the access token when it expires.
+   * Returns a new access token that replaces the expired one.
+   */
+  refreshTokenCallback?: () => Promise<string>;
 }
 
