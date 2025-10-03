@@ -5,7 +5,7 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 export const expandBrainloop: Tool = {
   name: "expand_brainloop",
-  description: "Expand an existing brainloop by adding ONE lesson at a time. IMPORTANT: Add content incrementally - create one unit with ONE lesson, verify it was added successfully by checking the response, then add the next lesson to the same unit or a new unit. This lesson-by-lesson approach ensures quality, allows for adjustments, and prevents duplicate work if a failure occurs.",
+  description: "Expand an existing brainloop by adding ONE lesson at a time. IMPORTANT: Add content incrementally - create one unit with ONE lesson (teaching content only, NO questions in lesson), verify it was added successfully by checking the response, then create an interaction for that lesson (questions/exercises), verify it was added, then proceed to the next lesson. This lesson→verify→interaction→verify workflow ensures quality, allows for adjustments, and prevents duplicate work if a failure occurs.",
   inputSchema: {
     type: "object",
     properties: {

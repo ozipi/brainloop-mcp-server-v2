@@ -85,18 +85,22 @@ Brainloop: "Machine Learning Fundamentals"
 - **Start simple**: Begin with 3-5 units (structure only, no lessons yet)
 - **ONE LESSON AT A TIME**: Use \`create_brainloop\` to create structure, then \`expand_brainloop\` to add ONE lesson at a time
 - **VERIFY EACH LESSON**: After adding each lesson, check the response to confirm it was created successfully before adding the next one
-- **Prevent duplicate work**: This lesson-by-lesson verification prevents creating duplicate content if a failure occurs mid-process
+- **ADD INTERACTIONS AFTER LESSON**: Once a lesson is verified, immediately add its interaction (questions/exercises) before proceeding to the next lesson
+- **VERIFY INTERACTION**: Confirm the interaction was created successfully before moving to the next lesson
+- **Prevent duplicate work**: This lesson-by-lesson + interaction verification prevents creating duplicate content if a failure occurs mid-process
 - **Progressive complexity**: Each unit builds on previous ones
-- **Interactive learning**: ALWAYS include questions and exercises in lessons
+- **Interactive learning**: ALWAYS include questions and exercises via interactions
 - **Clear learning paths**: Show progression clearly
-- **Quality over speed**: Take time to verify each lesson addition rather than batch-creating multiple lessons
+- **Quality over speed**: Take time to verify each lesson AND its interaction before proceeding
 
 ### 4. **Essential Components for Every Lesson**
 Every lesson MUST include:
-- **Core Teaching**: Explanation with examples
-- **Interactive Questions**: 2-5 questions that test understanding
-- **Practice Exercise**: Hands-on application of the concept
-- **Self-Assessment**: Reflection prompts or checkpoints
+- **Core Teaching**: Explanation with examples (in lesson content)
+- **Interaction**: Created separately AFTER lesson is verified
+  - **Type**: Questions, exercises, or assessments
+  - **Prompts**: 2-5 questions that test understanding
+  - **Practice Exercise**: Hands-on application of the concept
+  - **Self-Assessment**: Reflection prompts or checkpoints
 
 ## Using Brainloop Tools
 
@@ -106,11 +110,14 @@ Every lesson MUST include:
 Introduction, Data Types, Control Flow, Functions, and OOP"
 \`\`\`
 
-### Expand Existing Brainloop (ONE LESSON AT A TIME)
+### Expand Existing Brainloop (ONE LESSON AT A TIME + INTERACTIONS)
 \`\`\`
 "Add one lesson about decorators to the Functions unit in my Python brainloop"
-"Add another lesson about generators to the same unit"
-[Wait for confirmation after each lesson before adding the next]
+[Wait for confirmation that lesson was created]
+"Add an interaction with 3 questions to test understanding of decorators"
+[Wait for confirmation that interaction was created]
+"Now add a lesson about generators to the same unit"
+[Repeat: lesson → verify → interaction → verify → next lesson]
 \`\`\`
 
 ### Track Progress
@@ -165,11 +172,13 @@ Each lesson should answer:
 - **Content Structure** (REQUIRED):
   1. **Introduction** (Why learn this?)
   2. **Core Concept** explanation with examples
-  3. **Interactive Questions** (2-5 questions to test understanding)
-  4. **Practice Exercise** (Hands-on application)
-  5. **Summary** and key takeaways
+  3. **Summary** and key takeaways
 - **Length**: 5-15 minutes of content
-- **Interactivity**: Every lesson MUST include questions and exercises
+- **Interaction** (Created separately AFTER lesson):
+  - **Interactive Questions** (2-5 questions to test understanding)
+  - **Practice Exercise** (Hands-on application)
+  - **Self-Assessment** prompts
+  - Every lesson MUST have an interaction
 
 ### Content Guidelines
 - Use **markdown** for formatting
@@ -234,6 +243,8 @@ Brainloop: "Public Speaking"
 ## Lesson Content Format
 
 ### Recommended Structure (ALWAYS USE THIS)
+
+**Lesson Content:**
 \`\`\`markdown
 # Lesson Title
 
@@ -243,55 +254,70 @@ Brief overview of what learner will gain
 ## Core Concept
 Main teaching content with examples
 
-## Check Your Understanding
-**Question 1:** [Question text]
-- A) [Option]
-- B) [Option]
-- C) [Option]
-- D) [Option]
-
-**Answer:** [Correct answer with brief explanation]
-
-**Question 2:** [Question text]
-**Answer:** [Answer with explanation]
-
-[Include 2-5 questions per lesson]
-
-## Practice Exercise
-Hands-on exercise or real-world application task
-
 ## Summary
 Key takeaways and next steps
 \`\`\`
 
+**Interaction (Created separately AFTER lesson is verified):**
+\`\`\`json
+{
+  "type": "assessment",
+  "prompts": [
+    {
+      "question": "Question text here",
+      "type": "multiple_choice",
+      "options": ["A) Option 1", "B) Option 2", "C) Option 3", "D) Option 4"],
+      "answer": "C",
+      "explanation": "Explanation of correct answer"
+    },
+    {
+      "question": "Open-ended question",
+      "type": "short_answer",
+      "answer": "Expected answer or key points"
+    }
+  ]
+}
+\`\`\`
+[Include 2-5 prompts per interaction]
+
 ### Content Tips
+**For Lesson Content:**
 - **Use headers** to organize sections
 - **Bold** key terms and concepts
 - \`Code blocks\` for technical content
 - > Blockquotes for important notes
 - Lists for steps or key points
-- **Always include interactive questions** - This is NON-NEGOTIABLE
+- Focus on teaching content, NOT questions (questions go in interactions)
+
+**For Interactions:**
+- **Always create after lesson is verified** - This is NON-NEGOTIABLE
 - Mix multiple-choice and open-ended questions
-- Provide answers/explanations for all questions
+- Provide answers/explanations for all prompts
+- Include 2-5 prompts per interaction
+- Match interaction type to learning goal (assessment, exercise, reflection)
 
 ## Expanding Brainloops
 
-**CRITICAL: Add ONE LESSON at a time, verify success, then continue**
+**CRITICAL: Add ONE LESSON at a time, then its INTERACTION, verify each step**
 
 Incremental expansion workflow:
 1. Create initial brainloop structure with \`create_brainloop\` (topics only)
 2. Use \`expand_brainloop\` to add ONE lesson
-3. Check response to verify the lesson was created successfully
-4. If successful, add the next lesson
-5. If failed, troubleshoot before proceeding
-6. Repeat until unit is complete
-7. Move to next unit
+3. **VERIFY**: Check response to confirm lesson was created successfully
+4. Add ONE interaction (questions/exercises) for that lesson
+5. **VERIFY**: Check response to confirm interaction was created successfully
+6. If both successful, proceed to next lesson
+7. If any step fails, troubleshoot before proceeding
+8. Repeat: lesson → verify → interaction → verify → next lesson
+9. Continue until unit is complete, then move to next unit
 
-**Why lesson-by-lesson?**
-- Prevents duplicate work if errors occur
-- Allows quality verification at each step
+**Why lesson-by-lesson + interaction-by-interaction?**
+- Prevents duplicate work if errors occur mid-creation
+- Allows quality verification at each granular step
+- Ensures each lesson has its interactive component before moving on
 - Enables adjustments based on feedback
-- Catches issues early before compounding`,
+- Catches issues early before compounding
+- Maintains clean state even if process is interrupted`,
 
   BRAINLOOP_TEMPLATE: `{
   "title": "Your Brainloop Title",
