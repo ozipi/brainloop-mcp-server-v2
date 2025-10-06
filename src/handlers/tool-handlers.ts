@@ -119,6 +119,13 @@ const ToolSchemas = {
   get_unit_lessons: z.object({
     unitId: z.string().min(1).describe("The ID of the unit"),
   }),
+  detect_duplicates: z.object({
+    courseId: z.string().min(1).describe("The ID of the course to check for duplicates"),
+  }),
+  cleanup_empty_content: z.object({
+    courseId: z.string().min(1).describe("The ID of the course to clean up"),
+    dryRun: z.boolean().optional().describe("Preview mode - show what would be deleted without actually deleting"),
+  }),
   search_reddit: z.object({
     query: z.string().min(1).max(500).describe("Search query"),
     subreddit: z.string().optional().describe("Specific subreddit to search (optional)"),
