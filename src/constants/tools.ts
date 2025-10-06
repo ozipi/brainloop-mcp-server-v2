@@ -23,6 +23,8 @@ import { getLessonPrompts } from '../constants/tool/get-lesson-prompts.js';
 import { updateLesson } from '../constants/tool/update-lesson.js';
 import { updateUnit } from '../constants/tool/update-unit.js';
 import { getUnitLessons } from '../constants/tool/get-unit-lessons.js';
+import { detectDuplicates } from '../constants/tool/detect-duplicates.js';
+import { cleanupEmptyContent } from '../constants/tool/cleanup-empty-content.js';
 import type { RedditConfigData } from '../types/config.js';
 
 /**
@@ -84,6 +86,8 @@ export const TOOLS: Tool[] = [
   getLessonPrompts,
   updateLesson,
   updateUnit,
+  detectDuplicates,
+  cleanupEmptyContent,
 ];
 
 /**

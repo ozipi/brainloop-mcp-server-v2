@@ -415,4 +415,21 @@ export class BrainloopService {
       body: JSON.stringify(data),
     });
   }
+
+  /**
+   * Detect duplicate units and empty lessons in a course
+   */
+  async detectDuplicates(courseId: string): Promise<any> {
+    return this.makeRequest<any>(`/mcp/courses/${courseId}/duplicates`);
+  }
+
+  /**
+   * Clean up empty units from a course
+   */
+  async cleanupEmptyContent(courseId: string, dryRun: boolean = false): Promise<any> {
+    return this.makeRequest<any>(`/mcp/courses/${courseId}/cleanup`, {
+      method: 'POST',
+      body: JSON.stringify({ dryRun }),
+    });
+  }
 }

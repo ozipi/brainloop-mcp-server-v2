@@ -34,6 +34,8 @@ import {
   handleGetLessonPrompts,
   handleUpdateLesson,
   handleUpdateUnit,
+  handleDetectDuplicates,
+  handleCleanupEmptyContent,
 } from './tools/brainloop-handlers.js';
 
 /**
@@ -405,6 +407,12 @@ export async function handleToolCall(
         break;
       case "update_unit":
         result = await handleUpdateUnit(args as any, brainloopContext);
+        break;
+      case "detect_duplicates":
+        result = await handleDetectDuplicates(args as any, brainloopContext);
+        break;
+      case "cleanup_empty_content":
+        result = await handleCleanupEmptyContent(args as any, brainloopContext);
         break;
       default:
         logger.error("Unsupported tool in switch statement", { toolName: request.params.name });

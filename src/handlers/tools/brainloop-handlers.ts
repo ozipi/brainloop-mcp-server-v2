@@ -529,3 +529,135 @@ export async function handleGetUnitLessons(
     throw new Error(`Failed to get unit lessons: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
+
+/**
+ * Detect duplicate units and empty lessons
+ */
+export async function handleDetectDuplicates(
+  args: { courseId: string },
+  context: BrainloopToolContext
+): Promise<CallToolResult> {
+  try {
+    logger.info(`🔍 Detecting duplicates for course ${args.courseId}`);
+    const result = await context.brainloopService.detectDuplicates(args.courseId);
+
+    let responseText = `🔍 **Duplicate Detection Report**\n\n`;
+    responseText += `**Course:** ${result.courseTitle}\n`;
+    responseText += `**Course ID:** ${result.courseId}\n\n`;
+    responseText += `**Summary:**\n`;
+    responseText += `- Total Units: ${result.summary.totalUnits}\n`;
+    responseText += `- Duplicate Groups: ${result.summary.duplicateGroups}\n`;
+    responseText += `- Empty Units: ${result.summary.emptyUnits}\n\n`;
+
+    if (result.duplicates.length > 0) {
+      responseText += `**🔄 Duplicate Units Found:**\n\n`;
+      for (const group of result.duplicates) {
+        responseText += `"${group.normalizedTitle}" - ${group.count} copies:\n`;
+        for (const unit of group.units) {
+          responseText += `  - ${unit.title} (ID: ${unit.id})\n`;
+          responseText += `    Order: ${unit.order}, Lessons: ${unit.lessonCount}, Empty: ${unit.emptyLessonCount}\n`;
+        }
+        responseText += `\n`;
+      }
+    }
+
+    if (result.emptyUnits.length > 0) {
+      responseText += `**🗑️ Empty Units Found:**\n\n`;
+      for (const unit of result.emptyUnits) {
+        responseText += `- **${unit.title}** (ID: ${unit.id})\n`;
+        responseText += `  Order: ${unit.order}, Lessons: ${unit.lessonCount}\n`;
+        if (unit.lessons.length > 0) {
+          responseText += `  Empty Lessons:\n`;
+          for (const lesson of unit.lessons) {
+            responseText += `    - ${lesson.title} (ID: ${lesson.id})\n`;
+          }
+        }
+        responseText += `\n`;
+      }
+      responseText += `\n💡 Use cleanup_empty_content to remove these empty units.`;
+    } else {
+      responseText += `✅ No empty units found.`;
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: responseText
+      }]
+    };
+  } catch (error) {
+    logger.error('Failed to detect duplicates', { error, courseId: args.courseId });
+    throw new Error(`Failed to detect duplicates: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
+ * Clean up empty units
+ */
+export async function handleCleanupEmptyContent(
+  args: { courseId: string; dryRun?: boolean },
+  context: BrainloopToolContext
+): Promise<CallToolResult> {
+  try {
+    const dryRun = args.dryRun ?? false;
+    logger.info(`🧹 ${dryRun ? 'Previewing' : 'Performing'} cleanup for course ${args.courseId}`);
+    const result = await context.brainloopService.cleanupEmptyContent(args.courseId, dryRun);
+
+    let responseText = '';
+
+    if (result.dryRun) {
+      responseText = `🔍 **Cleanup Preview (Dry Run)**\n\n`;
+      responseText += `**Course:** ${result.courseTitle}\n`;
+      responseText += `**Course ID:** ${result.courseId}\n\n`;
+      responseText += `**What would be deleted:**\n`;
+      responseText += `- Empty Units: ${result.summary.unitsToDelete}\n`;
+      responseText += `- Empty Lessons: ${result.summary.lessonsToDelete}\n\n`;
+
+      if (result.unitsToDelete.length > 0) {
+        responseText += `**Units to be deleted:**\n\n`;
+        for (const unit of result.unitsToDelete) {
+          responseText += `- **${unit.title}** (ID: ${unit.id})\n`;
+          responseText += `  Lessons: ${unit.lessonCount}\n`;
+          if (unit.lessons.length > 0) {
+            responseText += `  Lesson Details:\n`;
+            for (const lesson of unit.lessons) {
+              responseText += `    - ${lesson.title} ${lesson.isEmpty ? '(empty)' : ''}\n`;
+            }
+          }
+          responseText += `\n`;
+        }
+        responseText += `\n💡 Run again with dryRun=false to actually delete these units.`;
+      } else {
+        responseText += `✅ No empty units to delete.`;
+      }
+    } else {
+      responseText = `✅ **Cleanup Complete!**\n\n`;
+      responseText += `**Course:** ${result.courseTitle}\n`;
+      responseText += `**Course ID:** ${result.courseId}\n\n`;
+      responseText += `**Summary:**\n`;
+      responseText += `- Units Before: ${result.summary.totalUnitsBeforeCleanup}\n`;
+      responseText += `- Units After: ${result.summary.totalUnitsAfterCleanup}\n`;
+      responseText += `- Units Deleted: ${result.summary.unitsDeleted}\n`;
+      responseText += `- Lessons Deleted: ${result.summary.lessonsDeleted}\n\n`;
+
+      if (result.deletedUnits.length > 0) {
+        responseText += `**Deleted Units:**\n`;
+        for (const unit of result.deletedUnits) {
+          responseText += `- ${unit.title} (${unit.lessonCount} lessons)\n`;
+        }
+      }
+
+      responseText += `\n🎉 Course cleaned up successfully!`;
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: responseText
+      }]
+    };
+  } catch (error) {
+    logger.error('Failed to cleanup empty content', { error, courseId: args.courseId });
+    throw new Error(`Failed to cleanup empty content: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}

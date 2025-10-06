@@ -46,5 +46,7 @@ export {
   handleCreatePromptsBatch,
   handleGetLessonPrompts,
   handleUpdateLesson,
-  handleUpdateUnit
+  handleUpdateUnit,
+  handleDetectDuplicates,
+  handleCleanupEmptyContent
 } from './brainloop-handlers.js';
