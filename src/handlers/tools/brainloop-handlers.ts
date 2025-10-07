@@ -12,6 +12,7 @@
 import { logger } from '../../utils/logger.js';
 import type { BrainloopService } from '../../services/brainloop/brainloop-service.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { RESOURCE_CONTENT } from '../../constants/resources.js';
 
 interface BrainloopToolContext {
   brainloopService: BrainloopService;
@@ -187,18 +188,26 @@ export async function handleExpandBrainloop(
     }
 
     return {
-      content: [{
-        type: 'text',
-        text: `🎉 **Brainloop Expanded Successfully!**\n\n` +
-          `Added ${results.length} new units to brainloop ${args.brainloopId}:\n\n` +
-          results.map(({ unit, lessons }) =>
-            `**${unit.title}**\n` +
-            `  Unit ID: ${unit.id}\n` +
-            `  Lessons: ${lessons.length}\n` +
-            lessons.map((l, i) => `  ${i + 1}. ${l.title} (ID: ${l.id})`).join('\n')
-          ).join('\n\n') +
-          `\n\n💡 **Next steps:** You can now create interactions and add questions to these lessons using their IDs.`
-      }]
+      content: [
+        {
+          type: 'text',
+          text: `🎉 **Brainloop Expanded Successfully!**\n\n` +
+            `Added ${results.length} new units to brainloop ${args.brainloopId}:\n\n` +
+            results.map(({ unit, lessons }) =>
+              `**${unit.title}**\n` +
+              `  Unit ID: ${unit.id}\n` +
+              `  Lessons: ${lessons.length}\n` +
+              lessons.map((l, i) => `  ${i + 1}. ${l.title} (ID: ${l.id})`).join('\n')
+            ).join('\n\n') +
+            `\n\n💡 **Next steps:** You can now create interactions and add questions to these lessons using their IDs.`
+        },
+        {
+          type: 'text',
+          text: `\n\n---\n\n## 📚 Lesson Content Template\n\n` +
+            `When creating lesson content, use this proven structure for maximum engagement and learning effectiveness:\n\n` +
+            RESOURCE_CONTENT.LESSON_TEMPLATE
+        }
+      ]
     };
   } catch (error) {
     logger.error('Failed to expand brainloop', { error, brainloopId: args.brainloopId });

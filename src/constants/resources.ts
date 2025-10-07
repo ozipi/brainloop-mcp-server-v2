@@ -561,7 +561,6 @@ This template provides a proven structure for creating engaging, effective lesso
 
 # [Lesson Title]
 
-## 🎯 Hook & Context
 [2-3 sentences that grab attention and establish relevance. Use a surprising fact, relatable scenario, or provocative question. Answer "Why should I care?"]
 
 ## 📋 What You'll Learn
@@ -572,8 +571,6 @@ By the end of this lesson, you'll be able to:
 - [Optional: 4th objective]
 
 ---
-
-## 📚 Core Content
 
 ### [Subsection 1: First Key Concept]
 [Explain the first major concept. Structure: define → explain → provide evidence → give example]
@@ -600,11 +597,6 @@ Remember these essential points:
 - **[Main Point 2]:** [Brief explanation]
 - **[Main Point 3]:** [Brief explanation]
 - **[Optional Point 4]:** [Brief explanation]
-
----
-
-## ✅ Check Your Understanding
-[Your interaction questions will appear here automatically - these are created separately using create_interaction and create_prompt tools]
 
 ---
 
@@ -640,8 +632,9 @@ Remember these essential points:
 
 ### Section-by-Section Guide:
 
-#### 🎯 Hook & Context
+#### Opening Hook (No Section Title)
 **Purpose**: Grab attention and answer "Why should I care?"
+**Location**: Immediately after lesson title, before "What You'll Learn"
 **Techniques**:
 - Start with a surprising statistic
 - Pose a thought-provoking question
@@ -658,9 +651,9 @@ Remember these essential points:
 - Recognize when to use different creational patterns
 - Refactor existing code to use design patterns
 
-#### 📚 Core Content
+#### Main Content Subsections (No "Core Content" Title)
 **Purpose**: Deliver the main teaching content
-**Structure**: 2-4 subsections, each focused on ONE concept
+**Structure**: 2-4 subsections (###), each with its own descriptive title focused on ONE concept
 **Flow**: Introduction → Detailed Explanation → Evidence/Data → Example → Transition
 **Tips**:
 - Start simple, build complexity gradually
@@ -668,6 +661,7 @@ Remember these essential points:
 - Provide context before diving into details
 - Include visual descriptions when helpful
 - Break up text with formatting
+- Each subsection should have a clear, descriptive title (not generic "Core Content")
 
 #### 💡 Key Takeaways
 **Purpose**: Reinforce the most important points
