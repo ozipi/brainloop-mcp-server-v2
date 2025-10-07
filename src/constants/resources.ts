@@ -32,6 +32,12 @@ export const RESOURCES = [
     mimeType: "text/markdown",
   },
   {
+    uri: "guidelines://lesson-template",
+    name: "Lesson Content Template",
+    description: "Structured template for creating engaging, consistent lesson content with hooks, learning objectives, and key takeaways",
+    mimeType: "text/markdown",
+  },
+  {
     uri: "template://brainloop",
     name: "Brainloop Template",
     description: "Template for creating a well-structured brainloop",
@@ -545,6 +551,159 @@ Interactive periodic table for chemistry.
 - Provide **clear instructions** for how to interact
 - Keep component configurations **simple** and focused
 - Test components to ensure they **work as expected**`,
+
+  LESSON_TEMPLATE: `# Lesson Content Template
+
+## Overview
+This template provides a proven structure for creating engaging, effective lessons that maximize learning retention and engagement. Use this as your guideline every time you create lesson content for brainloops.
+
+---
+
+# [Lesson Title]
+
+## 🎯 Hook & Context
+[2-3 sentences that grab attention and establish relevance. Use a surprising fact, relatable scenario, or provocative question. Answer "Why should I care?"]
+
+## 📋 What You'll Learn
+By the end of this lesson, you'll be able to:
+- [Specific, measurable objective using action verb]
+- [Specific, measurable objective using action verb]
+- [Specific, measurable objective using action verb]
+- [Optional: 4th objective]
+
+---
+
+## 📚 Core Content
+
+### [Subsection 1: First Key Concept]
+[Explain the first major concept. Structure: define → explain → provide evidence → give example]
+
+[Include relevant data, research findings, or concrete details]
+
+**Example:** [Real-world application or scenario]
+
+### [Subsection 2: Second Key Concept]
+[Continue with the next major idea, building on the previous section]
+
+[Use clear transitions between ideas]
+
+### [Subsection 3: Additional Concepts as Needed]
+[Keep each subsection focused on ONE main idea]
+
+[Use formatting like **bold** for key terms, but don't overdo it]
+
+---
+
+## 💡 Key Takeaways
+Remember these essential points:
+- **[Main Point 1]:** [Brief explanation]
+- **[Main Point 2]:** [Brief explanation]
+- **[Main Point 3]:** [Brief explanation]
+- **[Optional Point 4]:** [Brief explanation]
+
+---
+
+## ✅ Check Your Understanding
+[Your interaction questions will appear here automatically - these are created separately using create_interaction and create_prompt tools]
+
+---
+
+## Template Usage Guidelines
+
+### Content Length Guidelines:
+- **Hook & Context**: 50-100 words
+- **Learning Objectives**: 15-40 words per objective
+- **Core Content**: 300-800 words total (adjust based on complexity)
+- **Each subsection**: 100-250 words
+- **Key Takeaways**: 10-25 words per point
+- **Total lesson**: 500-1200 words (aim for 7-12 minute read)
+
+### Best Practices:
+1. **Use concrete examples**, not just theory
+2. **Include numbers/data** when possible (builds credibility)
+3. **Keep paragraphs short** (3-4 sentences max)
+4. **Use analogies** for complex concepts
+5. **Maintain consistent voice** throughout
+6. **Front-load important information**
+7. **Link concepts** to prior lessons when relevant
+8. **Add visual interest** with markdown formatting
+
+### Markdown Tips:
+- Use \`###\` for subsection headers (not \`##\`)
+- **Bold sparingly** - only key terms on first use
+- Use \`**Example:**\` to flag practical applications
+- Avoid excessive formatting (no emojis in content body except section headers)
+- Keep it scannable with whitespace
+- Use code blocks for technical content: \`\`\`language\`\`\`
+- Use blockquotes for important notes: \`> Important note\`
+- Use lists for steps or key points
+
+### Section-by-Section Guide:
+
+#### 🎯 Hook & Context
+**Purpose**: Grab attention and answer "Why should I care?"
+**Techniques**:
+- Start with a surprising statistic
+- Pose a thought-provoking question
+- Share a relatable problem scenario
+- Present a counterintuitive fact
+**Example**: "Did you know that 70% of developers spend more time debugging than writing new code? Understanding design patterns could cut that time in half."
+
+#### 📋 What You'll Learn
+**Purpose**: Set clear expectations and learning outcomes
+**Format**: Action-oriented bullet points
+**Verbs to use**: Create, Explain, Implement, Analyze, Apply, Compare, Design, Solve
+**Example**:
+- Implement the Factory pattern in real-world applications
+- Recognize when to use different creational patterns
+- Refactor existing code to use design patterns
+
+#### 📚 Core Content
+**Purpose**: Deliver the main teaching content
+**Structure**: 2-4 subsections, each focused on ONE concept
+**Flow**: Introduction → Detailed Explanation → Evidence/Data → Example → Transition
+**Tips**:
+- Start simple, build complexity gradually
+- Use concrete before abstract
+- Provide context before diving into details
+- Include visual descriptions when helpful
+- Break up text with formatting
+
+#### 💡 Key Takeaways
+**Purpose**: Reinforce the most important points
+**Format**: 3-4 bullet points with bold key terms
+**Content**: Should be able to stand alone as a summary
+**Test**: Could someone understand the lesson basics from just this section?
+
+### Common Mistakes to Avoid:
+❌ Starting with dense theory without context
+❌ Skipping the "why it matters" explanation
+❌ Using jargon without definitions
+❌ Writing walls of text without breaks
+❌ Forgetting to include examples
+❌ Making learning objectives vague ("Understand X" instead of "Implement X")
+❌ Overusing emojis or excessive formatting
+❌ Including quiz questions in lesson content (they go in interactions)
+
+### Quality Checklist:
+✅ Hook grabs attention immediately
+✅ Learning objectives use action verbs
+✅ Each subsection has a clear focus
+✅ Examples are concrete and relatable
+✅ Key takeaways summarize effectively
+✅ Length is appropriate (500-1200 words)
+✅ Markdown formatting enhances readability
+✅ No quiz questions in content (saved for interactions)
+✅ Consistent tone and voice
+✅ Clear progression from simple to complex
+
+---
+
+## Remember:
+- **Lesson content = TEACHING** (explanations, examples, concepts)
+- **Interactions = ASSESSMENT** (questions, exercises, created separately)
+- This template is for lesson content ONLY
+- After creating lesson, add 5 interactions using create_interaction and create_prompt tools`,
 
   BRAINLOOP_TEMPLATE: `{
   "title": "Your Brainloop Title",

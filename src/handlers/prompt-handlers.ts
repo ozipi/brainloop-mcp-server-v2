@@ -40,8 +40,15 @@ export async function handleGetPrompt(
   const resourceData: { [key: string]: string } = {};
   
   const resourceMappings: { [key: string]: string[] } = {
-    'brainloop_suggest_next': ['guidelines://brainloop-creation', 'guidelines://learning-design'],
-    'brainloop_creation_example': ['guidelines://brainloop-creation'],
+    'brainloop_suggest_next': [
+      'guidelines://brainloop-creation',
+      'guidelines://learning-design',
+      'guidelines://lesson-template'
+    ],
+    'brainloop_creation_example': [
+      'guidelines://brainloop-creation',
+      'guidelines://lesson-template'
+    ],
   };
 
   const resourcesToFetch = resourceMappings[request.params.name] || [];

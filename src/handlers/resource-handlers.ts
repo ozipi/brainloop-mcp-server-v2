@@ -101,6 +101,18 @@ export async function handleResourceCall(
       };
     }
 
+    if (uri === "guidelines://lesson-template") {
+      return {
+        contents: [
+          {
+            uri: request.params.uri,
+            mimeType: "text/markdown",
+            text: RESOURCE_CONTENT.LESSON_TEMPLATE,
+          },
+        ],
+      };
+    }
+
     if (uri === "template://brainloop") {
       return {
         contents: [
