@@ -203,9 +203,8 @@ export async function handleExpandBrainloop(
         },
         {
           type: 'text',
-          text: `\n\n---\n\n## 📚 Lesson Content Template\n\n` +
-            `When creating lesson content, use this proven structure for maximum engagement and learning effectiveness:\n\n` +
-            RESOURCE_CONTENT.LESSON_TEMPLATE
+          text: `\n\n---\n\n` +
+            RESOURCE_CONTENT.LESSON_TEMPLATE_CONDENSED
         }
       ]
     };

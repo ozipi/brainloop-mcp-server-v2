@@ -699,6 +699,46 @@ Remember these essential points:
 - This template is for lesson content ONLY
 - After creating lesson, add 5 interactions using create_interaction and create_prompt tools`,
 
+  LESSON_TEMPLATE_CONDENSED: `# Lesson Structure Template
+
+## Required Format:
+
+# [Lesson Title]
+
+[Opening hook - 2-3 engaging sentences that answer "Why should I care?"]
+
+## 📋 What You'll Learn
+- [Action-oriented objective 1]
+- [Action-oriented objective 2]
+- [Action-oriented objective 3]
+
+---
+
+### [Descriptive Subsection Title 1]
+[Main teaching content with examples]
+
+### [Descriptive Subsection Title 2]
+[Additional concepts with real-world applications]
+
+---
+
+## 💡 Key Takeaways
+- **[Main Point 1]:** [Brief explanation]
+- **[Main Point 2]:** [Brief explanation]
+- **[Main Point 3]:** [Brief explanation]
+
+---
+
+## Guidelines:
+- Hook: 50-100 words (surprising fact/relatable scenario)
+- Objectives: Use action verbs (Create, Implement, Analyze)
+- Content: 300-800 words total, 2-4 subsections with descriptive titles
+- Takeaways: 3-4 bullet points, 10-25 words each
+- Total: 500-1200 words (7-12 minute read)
+- Format: Use **bold** for key terms, code blocks for technical content
+- NO generic section titles (not "Core Content" or "Hook & Context")
+- Questions go in interactions (created separately), NOT in lesson content`,
+
   BRAINLOOP_TEMPLATE: `{
   "title": "Your Brainloop Title",
   "description": "What learners will gain from this brainloop",
