@@ -251,9 +251,16 @@ export class MCPHandler implements IMCPHandler {
         // Let the session's transport handle the request
         await sessionInfo.transport.handleRequest(req, res);
 
-      } else if (!sessionId && req.method === 'POST') {
-        // Create new session for any POST without session ID (likely initialization)
-        const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+      } else if ((sessionId && !this.sessions.has(sessionId)) || (!sessionId && req.method === 'POST')) {
+        // Recreate lost session OR create new session for any POST without session ID
+        const newSessionId = sessionId || `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+
+        if (sessionId && !this.sessions.has(sessionId)) {
+          console.log("📡 [MCP] Session lost (likely container restart), recreating session", {
+            sessionId: newSessionId,
+            timestamp: new Date().toISOString()
+          });
+        }
 
         // Extract auth info if available
         // Use the Google access token from req.auth.extra instead of the wrapper JWT
