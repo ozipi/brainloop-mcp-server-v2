@@ -36,6 +36,7 @@ import {
   handleUpdateUnit,
   handleDetectDuplicates,
   handleCleanupEmptyContent,
+  handleReorderUnits,
 } from './tools/brainloop-handlers.js';
 
 /**
@@ -125,6 +126,10 @@ const ToolSchemas = {
   cleanup_empty_content: z.object({
     courseId: z.string().min(1).describe("The ID of the course to clean up"),
     dryRun: z.boolean().optional().describe("Preview mode - show what would be deleted without actually deleting"),
+  }),
+  reorder_units: z.object({
+    brainloopId: z.string().min(1).describe("The course ID containing the units to reorder"),
+    unitIds: z.array(z.string()).min(1).describe("Array of unit IDs in desired order"),
   }),
   search_reddit: z.object({
     query: z.string().min(1).max(500).describe("Search query"),
@@ -420,6 +425,9 @@ export async function handleToolCall(
         break;
       case "cleanup_empty_content":
         result = await handleCleanupEmptyContent(args as any, brainloopContext);
+        break;
+      case "reorder_units":
+        result = await handleReorderUnits(args as any, brainloopContext);
         break;
       default:
         logger.error("Unsupported tool in switch statement", { toolName: request.params.name });

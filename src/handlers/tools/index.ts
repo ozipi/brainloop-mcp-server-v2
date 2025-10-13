@@ -48,5 +48,6 @@ export {
   handleUpdateLesson,
   handleUpdateUnit,
   handleDetectDuplicates,
-  handleCleanupEmptyContent
+  handleCleanupEmptyContent,
+  handleReorderUnits
 } from './brainloop-handlers.js';

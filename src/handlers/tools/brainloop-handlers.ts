@@ -600,6 +600,39 @@ export async function handleDetectDuplicates(
 }
 
 /**
+ * Reorder units in a course
+ */
+export async function handleReorderUnits(
+  args: { brainloopId: string; unitIds: string[] },
+  context: BrainloopToolContext
+): Promise<CallToolResult> {
+  try {
+    logger.info(`🔄 Reordering units for course ${args.brainloopId}`);
+    const result = await context.brainloopService.reorderUnits(args.brainloopId, args.unitIds);
+
+    let responseText = `✅ **Units Reordered Successfully!**\n\n`;
+    responseText += `**Course:** ${result.course.title}\n`;
+    responseText += `**Course ID:** ${result.course.id}\n\n`;
+    responseText += `**New Unit Order:**\n`;
+
+    for (const unit of result.units) {
+      responseText += `${unit.order}. **${unit.title}** (ID: ${unit.id})\n`;
+      responseText += `   Lessons: ${unit._count.lessons}\n`;
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: responseText
+      }]
+    };
+  } catch (error) {
+    logger.error('Failed to reorder units', { error, brainloopId: args.brainloopId });
+    throw new Error(`Failed to reorder units: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
  * Clean up empty units
  */
 export async function handleCleanupEmptyContent(

@@ -432,4 +432,14 @@ export class BrainloopService {
       body: JSON.stringify({ dryRun }),
     });
   }
+
+  /**
+   * Reorder units in a course
+   */
+  async reorderUnits(courseId: string, unitIds: string[]): Promise<any> {
+    return this.makeRequest<any>(`/mcp/courses/${courseId}/reorder-units`, {
+      method: 'PUT',
+      body: JSON.stringify({ unitIds }),
+    });
+  }
 }
