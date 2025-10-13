@@ -121,7 +121,11 @@ export class BrainloopService {
     const url = `${this.baseUrl}${endpoint}`;
 
     try {
-      logger.debug(`Making BRAINLOOP API request: ${url}`);
+      logger.info(`🌐 [API REQUEST] ${options.method || 'GET'} ${endpoint}`, {
+        userId: this.userId,
+        url,
+        hasBody: !!options.body
+      });
 
       const response = await fetch(url, {
         ...options,
@@ -161,19 +165,28 @@ export class BrainloopService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        logger.error(`BRAINLOOP API error: ${response.status} ${response.statusText}`, {
+        logger.error(`❌ [API ERROR] ${response.status} ${response.statusText}`, {
           url,
+          endpoint,
           status: response.status,
-          error: errorText,
+          error: errorText.substring(0, 500),
+          userId: this.userId
         });
-        throw new Error(`BRAINLOOP API error: ${response.status} ${response.statusText}`);
+        throw new Error(`BRAINLOOP API error: ${response.status} ${response.statusText}: ${errorText.substring(0, 200)}`);
       }
 
-      return await response.json() as T;
+      const data = await response.json() as T;
+      logger.info(`✅ [API SUCCESS] ${options.method || 'GET'} ${endpoint}`, {
+        userId: this.userId,
+        hasData: !!data
+      });
+      return data;
     } catch (error) {
-      logger.error('BRAINLOOP API request failed', {
+      logger.error(`❌ [API EXCEPTION] ${endpoint}`, {
         url,
+        userId: this.userId,
         error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
       });
       throw error;
     }

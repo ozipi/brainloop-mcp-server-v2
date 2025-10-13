@@ -370,6 +370,12 @@ export async function handleToolCall(
 
     let result: CallToolResult;
 
+    logger.info(`🔧 [TOOL CALL START] ${toolName}`, {
+      args,
+      userId: credentials.userId,
+      sessionId: context.sessionId
+    });
+
     // Create brainloop service for brainloop tools
     const brainloopService = new BrainloopService({
       accessToken: credentials.accessToken,
@@ -377,11 +383,15 @@ export async function handleToolCall(
       refreshTokenCallback: context.refreshTokenCallback,
     });
 
+    logger.info(`✅ [BRAINLOOP SERVICE] Created for user`, { userId: credentials.userId });
+
     const brainloopContext = {
       brainloopService,
       userId: credentials.userId,
       sessionId: context.sessionId,
     };
+
+    logger.info(`🎯 [TOOL DISPATCH] Calling handler for ${toolName}`);
 
     switch (request.params.name) {
       case "create_brainloop":
@@ -434,9 +444,22 @@ export async function handleToolCall(
         throw new Error(`${TOOL_ERROR_MESSAGES.UNKNOWN_TOOL} ${request.params.name}`);
     }
 
+    logger.info(`✅ [TOOL CALL COMPLETE] ${toolName}`, {
+      hasResult: !!result,
+      contentBlocks: result?.content?.length || 0
+    });
+
     return result;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+
+    logger.error(`❌ [TOOL CALL FAILED] ${request.params.name}`, {
+      error: errorMessage,
+      stack: errorStack,
+      args: request.params.arguments,
+      sessionId: context.sessionId
+    });
 
     logger.error("Tool call failed", {
       toolName: request.params?.name,

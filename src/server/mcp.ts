@@ -93,9 +93,14 @@ export class MCPHandler implements IMCPHandler {
     });
 
     server.setRequestHandler(CallToolRequestSchema, async (request) => {
-      logger.debug(`🔧 [${sessionId}] Calling tool: ${request.params.name}`);
+      logger.info(`🔧 [TOOL REQUEST] ${request.params.name}`, {
+        sessionId,
+        args: JSON.stringify(request.params.arguments).substring(0, 200),
+        hasAuth: !!sessionAuth
+      });
 
       if (!sessionAuth) {
+        logger.error(`❌ [AUTH ERROR] No session auth for tool call`, { sessionId, tool: request.params.name });
         throw new Error("Authentication required for tool calls");
       }
 
@@ -138,7 +143,22 @@ export class MCPHandler implements IMCPHandler {
           }
         : undefined;
 
-      return handleToolCall(request, { sessionId, authInfo, refreshTokenCallback });
+      try {
+        const result = await handleToolCall(request, { sessionId, authInfo, refreshTokenCallback });
+        logger.info(`✅ [TOOL RESPONSE] ${request.params.name}`, {
+          sessionId,
+          hasContent: !!result?.content,
+          contentBlocks: result?.content?.length || 0
+        });
+        return result;
+      } catch (error) {
+        logger.error(`❌ [TOOL ERROR] ${request.params.name}`, {
+          sessionId,
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined
+        });
+        throw error;
+      }
     });
 
     // Prompts
