@@ -23,6 +23,7 @@ import { getLessonPrompts } from '../constants/tool/get-lesson-prompts.js';
 import { updateLesson } from '../constants/tool/update-lesson.js';
 import { updateUnit } from '../constants/tool/update-unit.js';
 import { getUnitLessons } from '../constants/tool/get-unit-lessons.js';
+import { getLesson } from '../constants/tool/get-lesson.js';
 import { detectDuplicates } from '../constants/tool/detect-duplicates.js';
 import { cleanupEmptyContent } from '../constants/tool/cleanup-empty-content.js';
 import { reorderUnits } from '../constants/tool/reorder-units.js';
@@ -81,6 +82,7 @@ export const TOOLS: Tool[] = [
   expandBrainloop,
   brainloopProgress,
   getUnitLessons,
+  getLesson,
   createInteraction,
   createPrompt,
   createPromptsBatch,

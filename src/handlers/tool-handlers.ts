@@ -28,6 +28,7 @@ import {
   handleExpandBrainloop,
   handleBrainloopProgress,
   handleGetUnitLessons,
+  handleGetLesson,
   handleCreateInteraction,
   handleCreatePrompt,
   handleCreatePromptsBatch,
@@ -119,6 +120,9 @@ const ToolSchemas = {
   }),
   get_unit_lessons: z.object({
     unitId: z.string().min(1).describe("The ID of the unit"),
+  }),
+  get_lesson: z.object({
+    lessonId: z.string().min(1).describe("The ID of the lesson to retrieve full content"),
   }),
   detect_duplicates: z.object({
     courseId: z.string().min(1).describe("The ID of the course to check for duplicates"),
@@ -217,6 +221,7 @@ type ToolArgs = {
   expand_brainloop: any;
   brainloop_progress: any;
   get_unit_lessons: any;
+  get_lesson: any;
   create_interaction: any;
   create_prompt: any;
   create_prompts_batch: any;
@@ -411,6 +416,9 @@ export async function handleToolCall(
         break;
       case "get_unit_lessons":
         result = await handleGetUnitLessons(args as any, brainloopContext);
+        break;
+      case "get_lesson":
+        result = await handleGetLesson(args as any, brainloopContext);
         break;
       case "create_interaction":
         result = await handleCreateInteraction(args as any, brainloopContext);

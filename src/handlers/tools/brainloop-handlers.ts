@@ -539,6 +539,38 @@ export async function handleGetUnitLessons(
 }
 
 /**
+ * Get a single lesson with full content
+ */
+export async function handleGetLesson(
+  args: { lessonId: string },
+  context: BrainloopToolContext
+): Promise<CallToolResult> {
+  try {
+    logger.info(`📖 Getting lesson content for ${args.lessonId}`);
+    const lesson = await context.brainloopService.getLesson(args.lessonId);
+
+    return {
+      content: [{
+        type: 'text',
+        text: `📖 **${lesson.title}**\n\n` +
+          `**Lesson ID:** ${lesson.id}\n` +
+          `**Order:** ${lesson.order}\n` +
+          (lesson.videoUrl ? `**Video:** ${lesson.videoUrl}\n` : '') +
+          `**Content Length:** ${lesson.content?.length || 0} characters\n` +
+          `**Last Updated:** ${new Date(lesson.updatedAt).toLocaleString()}\n\n` +
+          `---\n\n` +
+          `**Content:**\n\n${lesson.content || '*No content available*'}\n\n` +
+          `---\n\n` +
+          `💡 Use \`update_lesson\` to modify this lesson's content.`
+      }]
+    };
+  } catch (error) {
+    logger.error('Failed to get lesson', { error, lessonId: args.lessonId });
+    throw new Error(`Failed to get lesson: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
  * Detect duplicate units and empty lessons
  */
 export async function handleDetectDuplicates(
