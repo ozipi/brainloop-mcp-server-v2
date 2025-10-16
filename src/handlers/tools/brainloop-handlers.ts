@@ -449,7 +449,7 @@ export async function handleUpdateLesson(
           `**Title:** ${result.lesson.title}\n` +
           `**Content Length:** ${result.lesson.content?.length || 0} characters\n` +
           (result.lesson.videoUrl ? `**Video:** ${result.lesson.videoUrl}\n` : '') +
-          `**Last Updated:** ${new Date(result.lesson.updatedAt).toLocaleString()}\n\n` +
+          (result.lesson.updatedAt ? `**Last Updated:** ${new Date(result.lesson.updatedAt).toLocaleString()}\n\n` : '\n') +
           `💡 Changes saved successfully. The lesson content has been updated.`
       }]
     };
@@ -485,7 +485,7 @@ export async function handleUpdateUnit(
           `**Title:** ${result.unit.title}\n` +
           `**Description:** ${result.unit.description}\n` +
           `**Lesson Count:** ${result.unit._count?.lessons || 0}\n` +
-          `**Last Updated:** ${new Date(result.unit.updatedAt).toLocaleString()}\n\n` +
+          (result.unit.updatedAt ? `**Last Updated:** ${new Date(result.unit.updatedAt).toLocaleString()}\n\n` : '\n') +
           `💡 Changes saved successfully. The unit details have been updated.`
       }]
     };
@@ -557,7 +557,7 @@ export async function handleGetLesson(
           `**Order:** ${lesson.order}\n` +
           (lesson.videoUrl ? `**Video:** ${lesson.videoUrl}\n` : '') +
           `**Content Length:** ${lesson.content?.length || 0} characters\n` +
-          `**Last Updated:** ${new Date(lesson.updatedAt).toLocaleString()}\n\n` +
+          (lesson.updatedAt ? `**Last Updated:** ${new Date(lesson.updatedAt).toLocaleString()}\n\n` : '\n') +
           `---\n\n` +
           `**Content:**\n\n${lesson.content || '*No content available*'}\n\n` +
           `---\n\n` +

@@ -44,6 +44,8 @@ export interface Unit {
   description?: string;
   order: number;
   courseId: string;
+  createdAt?: string;
+  updatedAt?: string;
   _count?: {
     lessons: number;
   };
@@ -56,6 +58,8 @@ export interface Lesson {
   order: number;
   unitId: string;
   videoUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Progress {
