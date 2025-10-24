@@ -39,6 +39,13 @@ import {
   handleCleanupEmptyContent,
   handleReorderUnits,
 } from './tools/brainloop-handlers.js';
+import {
+  handleCreateTrack,
+  handleViewTracks,
+  handleGetTrack,
+  handleAddCourseToTrack,
+  handleEnrollInTrack,
+} from './tools/track-handlers.js';
 
 /**
  * Zod schemas for brainloop tool validation
@@ -134,6 +141,26 @@ const ToolSchemas = {
   reorder_units: z.object({
     brainloopId: z.string().min(1).describe("The course ID containing the units to reorder"),
     unitIds: z.array(z.string()).min(1).describe("Array of unit IDs in desired order"),
+  }),
+  // BrainTrack tool schemas
+  create_track: z.object({
+    title: z.string().min(1).describe("Title of the track"),
+    description: z.string().min(1).describe("Description of the learning path"),
+    icon: z.string().optional().describe("Emoji icon for the track"),
+    hero: z.string().optional().describe("Hero image URL"),
+    isPrivate: z.boolean().optional().describe("Make track private"),
+    slug: z.string().optional().describe("URL-friendly slug"),
+  }),
+  view_tracks: z.object({}),
+  get_track: z.object({
+    trackId: z.string().min(1).describe("The ID of the track"),
+  }),
+  add_course_to_track: z.object({
+    trackId: z.string().min(1).describe("The ID of the track"),
+    courseId: z.string().min(1).describe("The ID of the course to add"),
+  }),
+  enroll_in_track: z.object({
+    trackId: z.string().min(1).describe("The ID of the track to enroll in"),
   }),
   search_reddit: z.object({
     query: z.string().min(1).max(500).describe("Search query"),
@@ -446,6 +473,22 @@ export async function handleToolCall(
         break;
       case "reorder_units":
         result = await handleReorderUnits(args as any, brainloopContext);
+        break;
+      // BrainTrack tools
+      case "create_track":
+        result = await handleCreateTrack(args as any, brainloopContext);
+        break;
+      case "view_tracks":
+        result = await handleViewTracks(args, brainloopContext);
+        break;
+      case "get_track":
+        result = await handleGetTrack(args as any, brainloopContext);
+        break;
+      case "add_course_to_track":
+        result = await handleAddCourseToTrack(args as any, brainloopContext);
+        break;
+      case "enroll_in_track":
+        result = await handleEnrollInTrack(args as any, brainloopContext);
         break;
       default:
         logger.error("Unsupported tool in switch statement", { toolName: request.params.name });

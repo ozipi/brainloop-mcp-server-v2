@@ -10,6 +10,7 @@ export * from './structured-data-example.js';
 export * from './logging.js';
 export * from './validation-example.js';
 export * from './brainloop-handlers.js';
+export * from './track-handlers.js';
 
 export type {
   ToolHandler,
@@ -52,3 +53,10 @@ export {
   handleCleanupEmptyContent,
   handleReorderUnits
 } from './brainloop-handlers.js';
+export {
+  handleCreateTrack,
+  handleViewTracks,
+  handleGetTrack,
+  handleAddCourseToTrack,
+  handleEnrollInTrack
+} from './track-handlers.js';

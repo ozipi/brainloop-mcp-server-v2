@@ -27,6 +27,11 @@ import { getLesson } from '../constants/tool/get-lesson.js';
 import { detectDuplicates } from '../constants/tool/detect-duplicates.js';
 import { cleanupEmptyContent } from '../constants/tool/cleanup-empty-content.js';
 import { reorderUnits } from '../constants/tool/reorder-units.js';
+import { createTrack } from '../constants/tool/create-track.js';
+import { viewTracks } from '../constants/tool/view-tracks.js';
+import { getTrack } from '../constants/tool/get-track.js';
+import { addCourseToTrack } from '../constants/tool/add-course-to-track.js';
+import { enrollInTrack } from '../constants/tool/enroll-in-track.js';
 import type { RedditConfigData } from '../types/config.js';
 
 /**
@@ -92,6 +97,12 @@ export const TOOLS: Tool[] = [
   detectDuplicates,
   cleanupEmptyContent,
   reorderUnits,
+  // BrainTrack (learning path) tools
+  createTrack,
+  viewTracks,
+  getTrack,
+  addCourseToTrack,
+  enrollInTrack,
 ];
 
 /**
