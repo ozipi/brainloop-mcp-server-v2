@@ -11,7 +11,7 @@
  */
 
 import { logger } from '../../utils/logger.js';
-import type { BrainloopService } from '../../services/brainloop/brainloop-service.js';
+import type { BrainloopService, Track, TrackCourse } from '../../services/brainloop/brainloop-service.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
 interface BrainloopToolContext {
@@ -84,7 +84,7 @@ export async function handleViewTracks(
         text: `🎯 **Your BrainTracks** (${tracks.length} total)\n\n` +
           (tracks.length === 0
             ? `No tracks yet. Create one with \`create_track\`!`
-            : tracks.map(track =>
+            : tracks.map((track: Track) =>
               `${track.icon || '🎯'} **${track.title}**\n` +
               `  📝 ${track.description}\n` +
               `  🆔 ID: ${track.id}\n` +
@@ -118,14 +118,14 @@ export async function handleGetTrack(
     responseText += `  🔗 Slug: ${track.slug}\n`;
     responseText += `  ${track.isPrivate ? '🔒 Private' : '🌍 Public'}\n`;
     responseText += `  👤 Created by: ${track.user.name || track.user.email}\n`;
-    responseText += `  👥 Learners: ${track._count.enrollments}\n`;
+    responseText += `  👥 Learners: ${track._count?.enrollments || 0}\n`;
     responseText += `  ${track.isOwner ? '👑 You own this track\n' : ''}`;
     responseText += `  ${track.isEnrolled ? '✅ You are enrolled\n' : ''}\n`;
 
-    if (track.trackCourses.length > 0) {
+    if (track.trackCourses && track.trackCourses.length > 0) {
       responseText += `**Learning Path (${track.trackCourses.length} courses):**\n\n`;
-      track.trackCourses.forEach((tc, index) => {
-        responseText += `${index + 1}. ${tc.course.icon || '📚'} **${tc.course.title}**\n`;
+      track.trackCourses.forEach((tc: TrackCourse, index: number) => {
+        responseText += `${index + 1}. 📚 **${tc.course.title}**\n`;
         responseText += `   ${tc.course.description}\n`;
         responseText += `   Course ID: ${tc.course.id}\n\n`;
       });
@@ -188,8 +188,8 @@ export async function handleEnrollInTrack(
         type: 'text',
         text: `🎉 **Successfully Enrolled in Track!**\n\n` +
           `**Track:** ${result.track.title}\n` +
-          `**Courses:** ${result.track._count.trackCourses}\n\n` +
-          `✅ You are now enrolled in all ${result.track._count.trackCourses} courses in this track!\n\n` +
+          `**Courses:** ${result.track._count?.trackCourses || 0}\n\n` +
+          `✅ You are now enrolled in all ${result.track._count?.trackCourses || 0} courses in this track!\n\n` +
           result.message
       }]
     };

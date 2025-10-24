@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(cat:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfix: add missing timestamp fields and handle optional updatedAt in handlers\n\n- Add createdAt and updatedAt optional fields to Unit and Lesson interfaces\n- Fix TypeScript compilation error where updatedAt was used but not defined\n- Handle optional updatedAt gracefully in handleUpdateLesson, handleUpdateUnit, and handleGetLesson\n- Ensures get_lesson tool can now be built and used successfully\n\nThis fixes the build error that was preventing the get_lesson tool from being available in the MCP server.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

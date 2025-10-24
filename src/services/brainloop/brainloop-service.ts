@@ -87,6 +87,47 @@ export interface Enrollment {
   course: Course;
 }
 
+export interface Track {
+  id: string;
+  title: string;
+  description: string;
+  icon?: string;
+  hero?: string;
+  slug: string;
+  isPrivate: boolean;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  user: {
+    name: string;
+    email: string;
+  };
+  _count?: {
+    trackCourses: number;
+    enrollments: number;
+  };
+  trackCourses?: TrackCourse[];
+  isOwner?: boolean;
+  isEnrolled?: boolean;
+}
+
+export interface TrackCourse {
+  id: string;
+  trackId: string;
+  courseId: string;
+  order: number;
+  createdAt: string;
+  course: Course;
+}
+
+export interface TrackEnrollment {
+  id: string;
+  userId: string;
+  trackId: string;
+  enrolledAt: string;
+  track: Track;
+}
+
 /**
  * Configuration for BRAINLOOP service authentication
  */
@@ -457,6 +498,68 @@ export class BrainloopService {
     return this.makeRequest<any>(`/mcp/courses/${courseId}/reorder-units`, {
       method: 'PUT',
       body: JSON.stringify({ unitIds }),
+    });
+  }
+
+  /**
+   * Create a new track
+   */
+  async createTrack(data: {
+    title: string;
+    description: string;
+    icon?: string;
+    hero?: string;
+    isPrivate?: boolean;
+    slug?: string;
+  }): Promise<Track> {
+    return this.makeRequest<Track>('/mcp/tracks', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Get all tracks for the user
+   */
+  async getTracks(): Promise<Track[]> {
+    return this.makeRequest<Track[]>('/mcp/tracks');
+  }
+
+  /**
+   * Get a specific track by ID
+   */
+  async getTrack(trackId: string): Promise<Track> {
+    return this.makeRequest<Track>(`/mcp/tracks/${trackId}`);
+  }
+
+  /**
+   * Add a course to a track
+   */
+  async addCourseToTrack(trackId: string, courseId: string): Promise<{
+    trackCourse: TrackCourse;
+    track: Track;
+  }> {
+    return this.makeRequest<{
+      trackCourse: TrackCourse;
+      track: Track;
+    }>(`/mcp/tracks/${trackId}/courses`, {
+      method: 'POST',
+      body: JSON.stringify({ courseId }),
+    });
+  }
+
+  /**
+   * Enroll in a track
+   */
+  async enrollInTrack(trackId: string): Promise<{
+    track: Track;
+    message: string;
+  }> {
+    return this.makeRequest<{
+      track: Track;
+      message: string;
+    }>(`/mcp/tracks/${trackId}/enroll`, {
+      method: 'POST',
     });
   }
 }
