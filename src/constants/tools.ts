@@ -27,6 +27,7 @@ import { getLesson } from '../constants/tool/get-lesson.js';
 import { detectDuplicates } from '../constants/tool/detect-duplicates.js';
 import { cleanupEmptyContent } from '../constants/tool/cleanup-empty-content.js';
 import { reorderUnits } from '../constants/tool/reorder-units.js';
+import { moveLesson } from '../constants/tool/move-lesson.js';
 import { createTrack } from '../constants/tool/create-track.js';
 import { viewTracks } from '../constants/tool/view-tracks.js';
 import { getTrack } from '../constants/tool/get-track.js';
@@ -97,6 +98,7 @@ export const TOOLS: Tool[] = [
   detectDuplicates,
   cleanupEmptyContent,
   reorderUnits,
+  moveLesson,
   // BrainTrack (learning path) tools
   createTrack,
   viewTracks,

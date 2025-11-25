@@ -502,6 +502,16 @@ export class BrainloopService {
   }
 
   /**
+   * Move a lesson from one unit to another
+   */
+  async moveLesson(lessonId: string, targetUnitId: string, newOrder?: number): Promise<Lesson> {
+    return this.makeRequest<Lesson>(`/mcp/lessons/${lessonId}/move`, {
+      method: 'POST',
+      body: JSON.stringify({ targetUnitId, newOrder }),
+    });
+  }
+
+  /**
    * Create a new track
    */
   async createTrack(data: {

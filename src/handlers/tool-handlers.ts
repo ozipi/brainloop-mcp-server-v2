@@ -38,6 +38,7 @@ import {
   handleDetectDuplicates,
   handleCleanupEmptyContent,
   handleReorderUnits,
+  handleMoveLesson,
 } from './tools/brainloop-handlers.js';
 import {
   handleCreateTrack,
@@ -141,6 +142,11 @@ const ToolSchemas = {
   reorder_units: z.object({
     brainloopId: z.string().min(1).describe("The course ID containing the units to reorder"),
     unitIds: z.array(z.string()).min(1).describe("Array of unit IDs in desired order"),
+  }),
+  move_lesson: z.object({
+    lessonId: z.string().min(1).describe("The ID of the lesson to move"),
+    targetUnitId: z.string().min(1).describe("The ID of the target unit"),
+    newOrder: z.number().int().min(0).optional().describe("Optional new order position in target unit"),
   }),
   // BrainTrack tool schemas
   create_track: z.object({
@@ -473,6 +479,9 @@ export async function handleToolCall(
         break;
       case "reorder_units":
         result = await handleReorderUnits(args as any, brainloopContext);
+        break;
+      case "move_lesson":
+        result = await handleMoveLesson(args as any, brainloopContext);
         break;
       // BrainTrack tools
       case "create_track":

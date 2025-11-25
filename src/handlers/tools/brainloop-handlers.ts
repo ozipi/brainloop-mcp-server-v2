@@ -665,6 +665,40 @@ export async function handleReorderUnits(
 }
 
 /**
+ * Move a lesson from one unit to another
+ */
+export async function handleMoveLesson(
+  args: { lessonId: string; targetUnitId: string; newOrder?: number },
+  context: BrainloopToolContext
+): Promise<CallToolResult> {
+  try {
+    logger.info(`🔄 Moving lesson ${args.lessonId} to unit ${args.targetUnitId}`);
+    const result = await context.brainloopService.moveLesson(
+      args.lessonId,
+      args.targetUnitId,
+      args.newOrder
+    );
+
+    let responseText = `✅ **Lesson Moved Successfully!**\n\n`;
+    responseText += `**Lesson:** ${result.title}\n`;
+    responseText += `**Lesson ID:** ${result.id}\n`;
+    responseText += `**New Unit ID:** ${result.unitId}\n`;
+    responseText += `**New Order:** ${result.order}\n\n`;
+    responseText += `💡 The lesson has been moved to the target unit. Other lessons in both units have been automatically reordered.`;
+
+    return {
+      content: [{
+        type: 'text',
+        text: responseText
+      }]
+    };
+  } catch (error) {
+    logger.error('Failed to move lesson', { error, lessonId: args.lessonId, targetUnitId: args.targetUnitId });
+    throw new Error(`Failed to move lesson: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
  * Clean up empty units
  */
 export async function handleCleanupEmptyContent(
