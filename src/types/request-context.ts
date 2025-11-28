@@ -13,46 +13,33 @@
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 
 /**
- * Extended authentication information with Reddit-specific data.
+ * Extended authentication information with Brainloop-specific data.
  * 
  * @remarks
  * This interface extends the base MCP AuthInfo type to include
- * Reddit OAuth tokens and user information in the extra field.
+ * Google OAuth tokens and user information in the extra field.
  * The extra field is populated after successful OAuth authentication.
  * 
  * @example
  * ```typescript
- * const authInfo: RedditAuthInfo = {
+ * const authInfo: AuthInfo = {
  *   clientId: "mcp-client-123",
+ *   token: "jwt_token_here",
  *   extra: {
- *     userId: "reddit_username",
- *     redditAccessToken: "access_token_here",
- *     redditRefreshToken: "refresh_token_here"
+ *     userId: "user_id",
+ *     googleAccessToken: "access_token_here",
+ *     googleRefreshToken: "refresh_token_here"
  *   }
  * };
  * ```
  */
-export interface RedditAuthInfo extends AuthInfo {
-  /**
-   * Extra authentication data containing Reddit-specific information.
-   * Populated after successful OAuth flow completion.
-   */
-  extra?: {
-    /** Reddit username of the authenticated user */
-    userId?: string;
-    /** OAuth access token for Reddit API calls */
-    redditAccessToken?: string;
-    /** OAuth refresh token for renewing access */
-    redditRefreshToken?: string;
-  };
-}
 
 /**
  * Context passed from MCP server to tool handler functions.
  *
  * @remarks
  * This context provides all necessary information for handlers to:
- * - Authenticate Reddit API requests
+ * - Authenticate Brainloop API requests
  * - Track session state
  * - Access user-specific data
  * - Refresh expired tokens
@@ -65,7 +52,7 @@ export interface RedditAuthInfo extends AuthInfo {
  * ): Promise<ToolResult> {
  *   const { sessionId, authInfo, refreshTokenCallback } = context;
  *   const userId = authInfo.extra?.userId;
- *   // Use context for Reddit API calls
+ *   // Use context for Brainloop API calls
  * }
  * ```
  */
@@ -77,10 +64,10 @@ export interface MCPToolContext {
   sessionId: string;
 
   /**
-   * Authentication information including Reddit OAuth tokens.
+   * Authentication information including Google OAuth tokens.
    * Contains user identity and API credentials.
    */
-  authInfo: RedditAuthInfo;
+  authInfo: AuthInfo;
 
   /**
    * Optional callback to refresh the access token when it expires.

@@ -37,6 +37,7 @@ interface AuthorizationCode {
   codeChallenge: string;
   userId: string;
   googleTokens: { accessToken: string; refreshToken: string };
+  scope: string;
   expiresAt: number;
 }
 
@@ -44,6 +45,7 @@ interface RefreshTokenData {
   userId: string;
   clientId: string;
   googleTokens: { accessToken: string; refreshToken: string };
+  scope: string;
   expiresAt: number;
 }
 
@@ -355,7 +357,7 @@ export class OAuthProvider {
      *
      * Handles authorization requests with PKCE parameters.
      * Validates request, stores pending authorization, and
-     * redirects to Reddit OAuth for user consent.
+     * redirects to Google OAuth for user consent.
      */
     app.get("/oauth/authorize", (req, res) => {
       const {
@@ -465,7 +467,7 @@ export class OAuthProvider {
      *
      * Exchanges authorization code for access token.
      * Verifies PKCE code_verifier matches the original challenge.
-     * Returns JWT containing Reddit tokens for API access.
+     * Returns JWT containing Google tokens for API access.
      */
     app.post("/oauth/token", async (req, res) => {
       console.log("🔐 [OAUTH] Token exchange request received", {
@@ -530,6 +532,7 @@ export class OAuthProvider {
             userId: authCode.userId,
             clientId: authCode.clientId,
             googleTokens: authCode.googleTokens,
+            scope: authCode.scope,
             expiresAt: Date.now() + this.REFRESH_TOKEN_TIMEOUT_MS,
           });
 
@@ -540,7 +543,7 @@ export class OAuthProvider {
             tokenType: "Bearer",
             expiresIn: 86400,
             hasRefreshToken: !!refreshTokenId,
-            scope: "read",
+            scope: authCode.scope,
             timestamp: new Date().toISOString()
           });
 
@@ -549,7 +552,7 @@ export class OAuthProvider {
             token_type: "Bearer",
             expires_in: 86400, // 24 hours to match Google token expiry
             refresh_token: refreshTokenId,
-            scope: "read",
+            scope: authCode.scope,
           });
           return;
         } else if (grant_type === "refresh_token") {
@@ -582,7 +585,7 @@ export class OAuthProvider {
             access_token: accessToken,
             token_type: "Bearer",
             expires_in: 86400, // 24 hours to match Google token expiry
-            scope: "read",
+            scope: tokenData.scope,
           });
           return;
         } else {
@@ -705,6 +708,7 @@ export class OAuthProvider {
             accessToken: googleTokens.access_token,
             refreshToken: googleTokens.refresh_token,
           },
+          scope: pendingAuth.scope,
           expiresAt: Date.now() + this.AUTHORIZATION_CODE_TIMEOUT_MS,
         });
 
@@ -855,7 +859,7 @@ export class OAuthProvider {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Failed to exchange Reddit code: ${response.status} - ${errorText}`);
+      throw new Error(`Failed to exchange Google code: ${response.status} - ${errorText}`);
     }
 
     return await response.json();
