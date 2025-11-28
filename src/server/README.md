@@ -105,9 +105,11 @@ TypeScript interfaces for:
 
 Required environment variables:
 ```bash
-REDDIT_CLIENT_ID=your_client_id
-REDDIT_CLIENT_SECRET=your_client_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
 JWT_SECRET=your_jwt_secret_min_32_chars
+BRAINLOOP_API_URL=https://api.brainloop.cc
+BRAINLOOP_DATABASE_URL=your_database_url
 ```
 
 Optional:

@@ -29,7 +29,7 @@ import { handleListPrompts, handleGetPrompt } from "../handlers/prompt-handlers.
 import { handleListResources, handleResourceCall } from "../handlers/resource-handlers.js";
 import { logger } from "../utils/logger.js";
 import { rateLimitMiddleware, validateProtocolVersion, requestSizeLimit } from "./middleware.js";
-import type { RedditAuthInfo } from "../types/request-context.js";
+import type { AuthInfo } from "../types/request-context.js";
 import type { AuthenticatedRequest, OAuthProvider } from "./oauth.js";
 
 // Per-session auth context storage
@@ -104,14 +104,14 @@ export class MCPHandler implements IMCPHandler {
         throw new Error("Authentication required for tool calls");
       }
 
-      const authInfo: RedditAuthInfo = {
+      const authInfo: AuthInfo = {
         token: sessionAuth.accessToken,
         clientId: "mcp-client",
         scopes: ["read"],
         extra: {
           userId: sessionAuth.username,
-          redditAccessToken: sessionAuth.accessToken,
-          redditRefreshToken: sessionAuth.refreshToken,
+          googleAccessToken: sessionAuth.accessToken,
+          googleRefreshToken: sessionAuth.refreshToken,
         },
       };
 
@@ -181,15 +181,15 @@ export class MCPHandler implements IMCPHandler {
     server.setRequestHandler(ReadResourceRequestSchema, (request) => {
       logger.debug(`📖 [${sessionId}] Reading resource: ${request.params.uri}`);
 
-      const authInfo = sessionAuth
+      const authInfo: AuthInfo | undefined = sessionAuth
         ? {
             token: sessionAuth.accessToken,
             clientId: "mcp-client",
             scopes: ["read"],
             extra: {
               userId: sessionAuth.username,
-              redditAccessToken: sessionAuth.accessToken,
-              redditRefreshToken: sessionAuth.refreshToken,
+              googleAccessToken: sessionAuth.accessToken,
+              googleRefreshToken: sessionAuth.refreshToken,
             },
           }
         : undefined;

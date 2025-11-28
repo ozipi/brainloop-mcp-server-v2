@@ -5,7 +5,7 @@
  * @remarks
  * This module implements the MCP tool handling functionality, managing
  * both tool listing and tool invocation. It serves as the main entry point
- * for all tool-related operations in the Reddit MCP server.
+ * for all tool-related operations in the Brainloop MCP server.
  * 
  * @see {@link https://modelcontextprotocol.io/specification/2025-06-18/core/tools | MCP Tools Specification}
  */
@@ -20,7 +20,7 @@ import { z } from 'zod';
 import { TOOLS, TOOL_ERROR_MESSAGES } from '../constants/tools.js';
 import { BrainloopService } from '../services/brainloop/brainloop-service.js';
 import { logger } from '../utils/logger.js';
-import type { RedditAuthInfo, MCPToolContext } from '../types/request-context.js';
+import type { AuthInfo, MCPToolContext } from '../types/request-context.js';
 import {
   handleCreateBrainloop,
   handleViewBrainloops,
@@ -168,76 +168,6 @@ const ToolSchemas = {
   enroll_in_track: z.object({
     trackId: z.string().min(1).describe("The ID of the track to enroll in"),
   }),
-  search_reddit: z.object({
-    query: z.string().min(1).max(500).describe("Search query"),
-    subreddit: z.string().optional().describe("Specific subreddit to search (optional)"),
-    sort: z.enum(["relevance", "hot", "new", "top"]).default("relevance").describe("Sort order for results"),
-    time: z.enum(["hour", "day", "week", "month", "year", "all"]).default("all").describe("Time filter for results"),
-    limit: z.number().int().min(1).max(100).default(25).describe("Maximum number of results")
-  }),
-  
-  get_channel: z.object({
-    subreddit: z.string().min(1).describe("Name of the subreddit (without r/ prefix)"),
-    sort: z.enum(["hot", "new", "controversial"]).default("hot").describe("Sort order for posts")
-  }),
-  
-  get_post: z.object({
-    id: z.string().describe("The unique identifier of the post to retrieve")
-  }),
-  
-  get_notifications: z.object({
-    filter: z.enum(["all", "unread", "messages", "comments", "mentions"]).optional().describe("Filter notifications"),
-    limit: z.number().int().min(1).max(100).default(25).describe("Maximum number of notifications"),
-    markRead: z.boolean().optional().describe("Mark notifications as read"),
-    excludeIds: z.array(z.string()).optional().describe("IDs to exclude"),
-    excludeTypes: z.array(z.enum(["comment_reply", "post_reply", "username_mention", "message", "other"])).optional().describe("Types to exclude"),
-    excludeSubreddits: z.array(z.string()).optional().describe("Subreddits to exclude"),
-    after: z.string().optional().describe("Cursor for pagination"),
-    before: z.string().optional().describe("Cursor for pagination")
-  }),
-  
-  get_comment: z.object({
-    id: z.string().describe("The unique identifier of the comment"),
-    includeThread: z.boolean().optional().describe("Include full comment thread")
-  }),
-  
-  elicitation_example: z.object({
-    type: z.enum(["input", "confirm", "choice"]).describe("Type of elicitation"),
-    prompt: z.string().describe("Prompt to show to user"),
-    options: z.array(z.string()).optional().describe("Options for choice type")
-  }),
-  
-  sampling_example: z.object({
-    taskType: z.enum(['summarize', 'generate', 'analyze', 'translate']).describe("The type of sampling task to demonstrate"),
-    content: z.string().describe("Input content for the sampling task"),
-    targetLanguage: z.string().optional().describe("Target language for translation tasks"),
-    style: z.enum(['formal', 'casual', 'technical', 'creative']).optional().describe("Style preferences for generation tasks")
-  }),
-  
-  structured_data_example: z.object({
-    dataType: z.enum(['user', 'analytics', 'weather', 'product']).describe('The type of structured data to return'),
-    id: z.string().optional().describe('Optional ID to fetch specific data'),
-    includeNested: z.boolean().optional().default(false).describe('Whether to include nested data structures'),
-    simulateError: z.boolean().optional().default(false).describe('Whether to simulate validation errors for testing')
-  }).strict(),
-  
-  mcp_logging: z.object({
-    level: z.enum(["debug", "info", "warning", "error"]).describe("Log level"),
-    message: z.string().describe("Message to log"),
-    data: z.unknown().optional().describe("Optional additional data")
-  }),
-  
-  validation_example: z.object({
-    name: z.string().min(2).max(50).regex(/^[a-zA-Z ]+$/).describe("Name (letters and spaces only, 2-50 chars)"),
-    age: z.number().int().min(0).max(150).describe("Age in years (0-150)"),
-    email: z.string().email().describe("Valid email address"),
-    role: z.enum(["user", "admin", "moderator"]).describe("User role"),
-    preferences: z.object({
-      theme: z.enum(["light", "dark", "auto"]).optional().default("auto"),
-      notifications: z.boolean().optional().default(true)
-    }).optional(),
-    tags: z.array(z.string().min(1)).min(0).max(10).optional().describe("List of tags (max 10, unique)")
-  })
 };
 
 /**
@@ -269,7 +199,7 @@ type ToolArgs = {
  * @remarks
  * Returns all available tools sorted alphabetically by name.
  * This allows MCP clients to discover what tools are available
- * for interacting with Reddit.
+ * for interacting with Brainloop.
  * 
  * @param _request - The tool listing request (currently unused)
  * @returns Promise resolving to the list of available tools
@@ -315,7 +245,7 @@ interface BrainloopCredentials {
  * @returns Validated BRAINLOOP credentials
  * @throws Error if required credentials are missing or invalid
  */
-function extractAndValidateCredentials(authInfo: RedditAuthInfo): BrainloopCredentials {
+function extractAndValidateCredentials(authInfo: AuthInfo): BrainloopCredentials {
   if (!authInfo.token) {
     throw new Error("Authentication failed: Missing access token");
   }
@@ -344,12 +274,9 @@ function extractAndValidateCredentials(authInfo: RedditAuthInfo): BrainloopCrede
  * 1. Validates the requested tool exists
  * 2. Extracts and validates authentication credentials
  * 3. Validates tool arguments against the tool's input schema
- * 4. Creates a Reddit service instance
+ * 4. Creates a Brainloop service instance
  * 5. Dispatches to the appropriate tool handler
  * 6. Returns the tool result or error
- * 
- * Tools that require content generation (like create_post) will trigger
- * the sampling feature and return an async processing message.
  * 
  * @param request - The tool invocation request containing tool name and arguments
  * @param context - MCP context containing authentication and session information

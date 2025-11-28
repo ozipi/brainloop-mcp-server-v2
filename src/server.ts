@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * @file Main HTTP server for Reddit MCP
+ * @file Main HTTP server for Brainloop MCP
  * @module server
  * 
  * @remarks
@@ -16,12 +16,12 @@
  * 2. Client discovers metadata endpoints from WWW-Authenticate
  * 3. Client gets auth server info from /.well-known endpoints
  * 4. Client optionally registers at /oauth/register
- * 5. User authorizes at /oauth/authorize (redirects to Reddit)
- * 6. Reddit calls back to /oauth/reddit/callback
+ * 5. User authorizes at /oauth/authorize (redirects to Google)
+ * 6. Google calls back to /oauth/google/callback
  * 7. Client exchanges code at /oauth/token
  * 8. Client uses JWT token for authenticated /mcp requests
  * 
- * The server can be run standalone or integrated with platforms like Smithery.
+ * The server can be run standalone or integrated with platforms like Railway.
  */
 
 import express from 'express';
@@ -126,7 +126,7 @@ function setupUtilityRoutes(app: express.Application): void {
     });
     res.json({
       status: 'ok',
-      service: 'reddit-mcp-server',
+      service: 'brainloop-mcp-server',
       transport: 'http',
       capabilities: {
         oauth: true,

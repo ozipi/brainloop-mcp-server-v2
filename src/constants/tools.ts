@@ -1,11 +1,11 @@
 /**
- * @file Tool constants and utilities for the Reddit MCP server
+ * @file Tool constants and utilities for the Brainloop MCP server
  * @module constants/tools
  * 
  * @remarks
  * This module aggregates all available MCP tools and provides utilities
  * for tool management. Tools are the primary way clients interact with
- * the Reddit API through this MCP server.
+ * the Brainloop API through this MCP server.
  * 
  * @see {@link https://modelcontextprotocol.io/specification/2025-06-18/core/tools | MCP Tools Specification}
  */
@@ -33,7 +33,6 @@ import { viewTracks } from '../constants/tool/view-tracks.js';
 import { getTrack } from '../constants/tool/get-track.js';
 import { addCourseToTrack } from '../constants/tool/add-course-to-track.js';
 import { enrollInTrack } from '../constants/tool/enroll-in-track.js';
-import type { RedditConfigData } from '../types/config.js';
 
 /**
  * Standard error messages for tool operations.
@@ -107,26 +106,3 @@ export const TOOLS: Tool[] = [
   enrollInTrack,
 ];
 
-/**
- * Populates tools with initial data from Reddit configuration.
- * 
- * @remarks
- * This function can be used to inject user-specific data into tools
- * at initialization time. Currently, it creates a clone of each tool
- * to avoid modifying the original tool definitions.
- * 
- * @param tools - Array of tool definitions to populate
- * @param configData - Reddit configuration data containing user info
- * @returns Array of populated tool definitions
- * 
- * @example
- * ```typescript
- * const populatedTools = populateToolsInitialData(TOOLS, redditConfig);
- * ```
- */
-export function populateToolsInitialData(tools: Tool[], _configData: RedditConfigData): Tool[] {
-  return tools.map((tool) => {
-    const clonedTool = { ...tool };
-    return clonedTool;
-  });
-}

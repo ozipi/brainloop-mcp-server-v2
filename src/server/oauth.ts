@@ -357,7 +357,7 @@ export class OAuthProvider {
      *
      * Handles authorization requests with PKCE parameters.
      * Validates request, stores pending authorization, and
-     * redirects to Reddit OAuth for user consent.
+     * redirects to Google OAuth for user consent.
      */
     app.get("/oauth/authorize", (req, res) => {
       const {
@@ -467,7 +467,7 @@ export class OAuthProvider {
      *
      * Exchanges authorization code for access token.
      * Verifies PKCE code_verifier matches the original challenge.
-     * Returns JWT containing Reddit tokens for API access.
+     * Returns JWT containing Google tokens for API access.
      */
     app.post("/oauth/token", async (req, res) => {
       console.log("🔐 [OAUTH] Token exchange request received", {
@@ -859,7 +859,7 @@ export class OAuthProvider {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Failed to exchange Reddit code: ${response.status} - ${errorText}`);
+      throw new Error(`Failed to exchange Google code: ${response.status} - ${errorText}`);
     }
 
     return await response.json();
