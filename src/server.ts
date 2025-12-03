@@ -110,6 +110,31 @@ export async function createApp(): Promise<express.Application> {
   setupUtilityRoutes(app);
   await mcpHandler.setupRoutes(app, oauthProvider.authMiddleware());
 
+  // Catch-all route for unknown paths (e.g., Next.js static files that shouldn't be here)
+  app.use((req, res) => {
+    // Log unexpected requests for debugging
+    if (req.path.startsWith('/_next/') || req.path.startsWith('/static/')) {
+      console.warn("⚠️ [UNEXPECTED] Request for Next.js static file on MCP server", {
+        path: req.path,
+        method: req.method,
+        userAgent: req.headers['user-agent'],
+        referer: req.headers['referer'],
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    res.status(404).json({
+      error: "not_found",
+      error_description: `Path ${req.path} not found. This is an MCP server, not a Next.js application.`,
+      available_endpoints: {
+        mcp: "/",
+        oauth: "/oauth/authorize",
+        health: "/health",
+        metadata: "/metadata"
+      }
+    });
+  });
+
   return app;
 }
 
