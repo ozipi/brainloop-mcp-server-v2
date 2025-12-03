@@ -12,7 +12,7 @@ type SamplingCompleteNotification = {
   };
 };
 
-type RedditConfigNotification = {
+type ConfigNotification = {
   method: "server/config/changed";
   params: {
     _meta: Record<string, any>;
@@ -70,8 +70,8 @@ export async function sendSamplingCompleteNotification(message: string, sessionI
   await sendNotification(notification, sessionId);
 }
 
-export async function sendRedditConfigNotification(message: string): Promise<void> {
-  const notification: RedditConfigNotification = {
+export async function sendConfigNotification(message: string): Promise<void> {
+  const notification: ConfigNotification = {
     method: "server/config/changed",
     params: {
       _meta: {},
@@ -101,7 +101,7 @@ export async function sendProgressNotification(
 }
 
 async function sendNotification(
-  notification: ServerNotification | SamplingCompleteNotification | RedditConfigNotification | ProgressNotification,
+  notification: ServerNotification | SamplingCompleteNotification | ConfigNotification | ProgressNotification,
   sessionId?: string
 ) {
   const handler = getMCPHandlerInstance();

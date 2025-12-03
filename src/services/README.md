@@ -21,17 +21,17 @@ Integration with SystemPrompt.io API:
 - Manages request/response flow
 - Provides error handling
 
-### Reddit Services (`/reddit`)
+### Brainloop Services (`/brainloop`)
 
-Comprehensive Reddit API integration:
+Comprehensive Brainloop API integration:
 
 #### Core Components
-- **`reddit-service.ts`** - Main facade coordinating all Reddit operations
-- **`reddit-auth-service.ts`** - OAuth authentication and token management
-- **`reddit-fetch-service.ts`** - Base class for API requests with common functionality
-- **`reddit-post-service.ts`** - Post operations (create, fetch, search)
-- **`reddit-subreddit-service.ts`** - Subreddit-specific operations
-- **`index.ts`** - Public exports
+- **`brainloop-service.ts`** - Main service coordinating all Brainloop operations
+  - Course management (create, view, get, expand)
+  - Unit and lesson operations
+  - Progress tracking
+  - Interaction and prompt management
+  - Track management
 
 ## Architecture Patterns
 
@@ -50,23 +50,16 @@ class MyService {
 }
 ```
 
-### Facade Pattern
-Main service coordinates specialized services:
+### Service Pattern
+Main service provides all Brainloop operations:
 ```typescript
-class RedditService {
-  private authService: RedditAuthService;
-  private postService: RedditPostService;
-  
-  // Coordinates multiple services for complex operations
+class BrainloopService {
+  // Provides all Brainloop API operations
+  async getMyCourses(): Promise<Course[]>
+  async getCourse(courseId: string): Promise<Course>
+  async createTrack(data: TrackData): Promise<Track>
+  // ... more methods
 }
-```
-
-### Inheritance Hierarchy
-Base classes provide common functionality:
-```
-RedditFetchService (base)
-  ├── RedditPostService
-  └── RedditSubredditService
 ```
 
 ## Key Features
@@ -84,47 +77,21 @@ RedditFetchService (base)
 - Response caching where appropriate
 
 ### Data Transformation
-- Convert Reddit API responses to internal formats
+- Convert Brainloop API responses to internal formats
 - Handle API versioning differences
 - Normalize data structures
 - Type-safe interfaces
 
-## Reddit Service Details
+## Brainloop Service Details
 
-### RedditService
+### BrainloopService
 Main entry point providing:
-- Post operations (search, create, fetch)
-- Comment operations (create, fetch, reply)
-- Subreddit operations (info, posts, search)
-- User operations (messages, notifications)
-
-### RedditAuthService
-Handles authentication lifecycle:
-- Store credentials per session
-- Validate token expiry
-- Refresh tokens when needed
-- Provide auth headers
-
-### RedditFetchService
-Base class providing:
-- HTTP request methods (GET, POST, PUT)
-- Error handling and retry logic
-- Rate limit management
-- Response parsing
-
-### RedditPostService
-Specialized for post operations:
-- Create posts with validation
-- Search with various filters
-- Fetch post details and comments
-- Handle post metadata
-
-### RedditSubredditService
-Subreddit-specific operations:
-- Fetch subreddit info
-- Get subreddit posts
-- Check posting rules
-- Analyze subreddit activity
+- Course operations (create, view, get, expand)
+- Unit and lesson management
+- Progress tracking
+- Interaction and prompt creation
+- Track management and enrollment
+- Automatic token refresh on expiration
 
 ## Error Handling
 
@@ -192,27 +159,4 @@ When testing services:
 - Check rate limit handling
 - Test auth refresh
 
-## Extending for Other APIs
-
-To adapt for a different API:
-
-1. **Replace Reddit Directory**
-   - Create new API directory (e.g., `/twitter`)
-   - Implement auth service
-   - Create API-specific services
-
-2. **Update SystemPrompt Service**
-   - Modify for your use case
-   - Update callback handling
-
-3. **Implement Base Classes**
-   - Create fetch base class
-   - Add common functionality
-   - Implement retry logic
-
-4. **Define Data Models**
-   - Create TypeScript interfaces
-   - Add validation
-   - Implement transformers
-
-This service layer provides a clean separation between external APIs and the MCP protocol implementation, making it easy to adapt for different platforms.
+This service layer provides a clean separation between the Brainloop API and the MCP protocol implementation.

@@ -4,6 +4,7 @@ import { SignJWT, jwtVerify } from "jose";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 
 import type { ServerConfig } from "./config.js";
+import { logger } from "../utils/logger.js";
 
 export interface OAuthConfig extends ServerConfig {
   validRedirectUris: string[];
@@ -37,6 +38,7 @@ interface AuthorizationCode {
   codeChallenge: string;
   userId: string;
   googleTokens: { accessToken: string; refreshToken: string };
+  scope: string;
   expiresAt: number;
 }
 
@@ -44,6 +46,7 @@ interface RefreshTokenData {
   userId: string;
   clientId: string;
   googleTokens: { accessToken: string; refreshToken: string };
+  scope: string;
   expiresAt: number;
 }
 
@@ -118,7 +121,67 @@ export class OAuthProvider {
         },
       };
     } catch (error) {
-      // Auto-refresh logic would go here
+      // Try to auto-refresh if token is expired or invalid
+      // Check if it's an expiration error (jose throws JWTExpired error)
+      const isExpired = error instanceof Error && (
+        error.message.includes("expired") ||
+        error.message.includes("JWTExpired") ||
+        error.name === "JWTExpired"
+      );
+
+      if (isExpired) {
+        try {
+          // Decode expired token to extract refresh token (with clock tolerance to allow expired tokens)
+          const { payload: expiredPayload } = await jwtVerify(token, this.jwtSecret, {
+            audience: "brainloop-mcp-server",
+            issuer: this.config.OAUTH_ISSUER,
+            clockTolerance: 86400 * 7, // Allow 7 days tolerance to decode expired token
+          });
+
+          const googleRefreshToken = expiredPayload.google_refresh_token as string;
+          if (googleRefreshToken) {
+            logger.info("Auto-refreshing expired JWT token", {
+              userId: expiredPayload.sub,
+            });
+
+            // Refresh Google tokens
+            const newGoogleTokens = await this.refreshGoogleAccessToken(googleRefreshToken);
+            
+            // Create new JWT with refreshed tokens
+            const newToken = await this.createAccessToken(
+              expiredPayload.sub as string,
+              newGoogleTokens,
+            );
+
+            // Return new token info
+            const { payload: newPayload } = await jwtVerify(newToken, this.jwtSecret, {
+              audience: "brainloop-mcp-server",
+              issuer: this.config.OAUTH_ISSUER,
+            });
+
+            logger.info("Successfully auto-refreshed JWT token", {
+              userId: newPayload.sub,
+            });
+
+            return {
+              token: newToken,
+              clientId: "mcp-client",
+              scopes: ["read"],
+              expiresAt: newPayload.exp,
+              extra: {
+                userId: newPayload.sub,
+                googleAccessToken: newGoogleTokens.accessToken,
+                googleRefreshToken: newGoogleTokens.refreshToken,
+              },
+            };
+          }
+        } catch (refreshError) {
+          // If refresh fails, throw original error
+          logger.warn("Failed to auto-refresh expired token", {
+            error: refreshError instanceof Error ? refreshError.message : String(refreshError),
+          });
+        }
+      }
       throw new Error("Invalid or expired access token");
     }
   }
@@ -177,7 +240,15 @@ export class OAuthProvider {
       const token = authHeader.slice(7);
 
       try {
+        const originalToken = token;
         req.auth = await this.verifyAccessToken(token, req);
+        
+        // If token was refreshed, return new token in response header
+        if (req.auth.token !== originalToken) {
+          res.setHeader("X-New-Access-Token", req.auth.token);
+          logger.info("Returning refreshed token in response header");
+        }
+        
         next();
       } catch (error) {
         // For SSE requests (GET), provide proper SSE error response
@@ -355,7 +426,7 @@ export class OAuthProvider {
      *
      * Handles authorization requests with PKCE parameters.
      * Validates request, stores pending authorization, and
-     * redirects to Reddit OAuth for user consent.
+     * redirects to Google OAuth for user consent.
      */
     app.get("/oauth/authorize", (req, res) => {
       const {
@@ -465,7 +536,7 @@ export class OAuthProvider {
      *
      * Exchanges authorization code for access token.
      * Verifies PKCE code_verifier matches the original challenge.
-     * Returns JWT containing Reddit tokens for API access.
+     * Returns JWT containing Google tokens for API access.
      */
     app.post("/oauth/token", async (req, res) => {
       console.log("🔐 [OAUTH] Token exchange request received", {
@@ -530,6 +601,7 @@ export class OAuthProvider {
             userId: authCode.userId,
             clientId: authCode.clientId,
             googleTokens: authCode.googleTokens,
+            scope: authCode.scope,
             expiresAt: Date.now() + this.REFRESH_TOKEN_TIMEOUT_MS,
           });
 
@@ -540,7 +612,7 @@ export class OAuthProvider {
             tokenType: "Bearer",
             expiresIn: 86400,
             hasRefreshToken: !!refreshTokenId,
-            scope: "read",
+            scope: authCode.scope,
             timestamp: new Date().toISOString()
           });
 
@@ -549,7 +621,7 @@ export class OAuthProvider {
             token_type: "Bearer",
             expires_in: 86400, // 24 hours to match Google token expiry
             refresh_token: refreshTokenId,
-            scope: "read",
+            scope: authCode.scope,
           });
           return;
         } else if (grant_type === "refresh_token") {
@@ -582,7 +654,7 @@ export class OAuthProvider {
             access_token: accessToken,
             token_type: "Bearer",
             expires_in: 86400, // 24 hours to match Google token expiry
-            scope: "read",
+            scope: tokenData.scope,
           });
           return;
         } else {
@@ -705,6 +777,7 @@ export class OAuthProvider {
             accessToken: googleTokens.access_token,
             refreshToken: googleTokens.refresh_token,
           },
+          scope: pendingAuth.scope,
           expiresAt: Date.now() + this.AUTHORIZATION_CODE_TIMEOUT_MS,
         });
 
@@ -855,7 +928,7 @@ export class OAuthProvider {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Failed to exchange Reddit code: ${response.status} - ${errorText}`);
+      throw new Error(`Failed to exchange Google code: ${response.status} - ${errorText}`);
     }
 
     return await response.json();

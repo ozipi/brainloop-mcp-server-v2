@@ -1,12 +1,12 @@
 # Handler Functions
 
-This directory contains the core handler functions that process MCP (Model Context Protocol) requests and implement the business logic for interacting with Reddit.
+This directory contains the core handler functions that process MCP (Model Context Protocol) requests and implement the business logic for interacting with Brainloop.
 
 ## Overview
 
-Handlers are the bridge between the MCP protocol and Reddit's API. They:
+Handlers are the bridge between the MCP protocol and Brainloop's API. They:
 - Process incoming tool calls from AI clients
-- Execute Reddit API operations
+- Execute Brainloop API operations
 - Handle AI-assisted content generation through sampling
 - Send notifications about operation results
 
@@ -49,28 +49,20 @@ Resource management for MCP protocol:
 
 Handlers that process AI-generated content:
 
-- **`create-post.ts`** - Posts AI-generated content to Reddit
-- **`create-comment.ts`** - Creates comments with AI assistance
-- **`create-message.ts`** - Sends private messages
 - **`suggest-action.ts`** - Analyzes content and suggests actions
 
 ### Tool Handlers (`/tools`)
 
 Individual tool implementations:
 
-#### Search and Discovery
-- **`search-reddit.ts`** - Search posts across Reddit
-- **`get-channel.ts`** - Get subreddit information
+#### Brainloop Management
+- **`brainloop-handlers.ts`** - Create, view, and manage brainloops (courses)
+- **`track-handlers.ts`** - Manage learning tracks and enrollments
 
-#### Content Retrieval
-- **`get-post.ts`** - Fetch post details and comments
-- **`get-comment.ts`** - Get specific comment thread
-- **`get-notifications.ts`** - Retrieve user notifications
-
-#### Content Creation
-- **`create-post.ts`** - Submit new posts
-- **`create-comment.ts`** - Reply to posts/comments
-- **`create-message.ts`** - Send private messages
+#### Lesson and Content Management
+- **`brainloop-handlers.ts`** - Get lessons, units, and course content
+- **`brainloop-handlers.ts`** - Update lessons and units
+- **`brainloop-handlers.ts`** - Create interactions and prompts
 
 ### Supporting Files
 
@@ -86,7 +78,7 @@ JSON schema definitions for:
 1. Client sends tool call → tool-handlers.ts
 2. Handler validates arguments
 3. Handler calls specific tool function
-4. Tool executes Reddit API call
+4. Tool executes Brainloop API call
 5. Result formatted and returned
 6. Notification sent about completion
 ```
@@ -97,7 +89,7 @@ JSON schema definitions for:
 2. sampling.ts routes to correct server instance
 3. Client generates content with AI
 4. Callback handler receives result
-5. Callback executes Reddit operation
+5. Callback executes Brainloop operation
 6. Notification sent with outcome
 ```
 
@@ -108,7 +100,7 @@ All handlers receive authentication context through:
 ```typescript
 interface MCPToolContext {
   sessionId: string;
-  authInfo: RedditAuthInfo;
+  authInfo: AuthInfo;
 }
 ```
 
@@ -139,29 +131,27 @@ To add a new tool:
 ## Example Tool Handler
 
 ```typescript
-export async function handleRedditSearch(
-  args: SearchRedditArgs,
+export async function handleGetBrainloop(
+  args: GetBrainloopArgs,
   context: MCPToolContext
 ): Promise<ToolResponse> {
   try {
     // Validate arguments
-    validateSearchArgs(args);
+    validateBrainloopArgs(args);
     
-    // Get Reddit service with auth
-    const reddit = new RedditService(context.authInfo);
-    
-    // Execute search
-    const results = await reddit.search({
-      query: args.query,
-      subreddit: args.subreddit,
-      sort: args.sort,
-      limit: args.limit
+    // Get Brainloop service with auth
+    const brainloop = new BrainloopService({
+      accessToken: context.authInfo.token,
+      userId: context.authInfo.extra?.userId || 'unknown',
     });
+    
+    // Execute API call
+    const brainloop = await brainloop.getCourse(args.brainloopId);
     
     // Send success notification
     await sendOperationNotification(
-      'search_reddit',
-      `Found ${results.length} results`,
+      'get_brainloop',
+      `Retrieved brainloop: ${brainloop.title}`,
       context.sessionId
     );
     
@@ -169,14 +159,14 @@ export async function handleRedditSearch(
     return {
       content: [{
         type: 'text',
-        text: JSON.stringify(results, null, 2)
+        text: JSON.stringify(brainloop, null, 2)
       }]
     };
   } catch (error) {
     // Send error notification
     await sendOperationNotification(
-      'search_reddit',
-      `Search failed: ${error.message}`,
+      'get_brainloop',
+      `Failed to retrieve brainloop: ${error.message}`,
       context.sessionId
     );
     throw error;
@@ -187,18 +177,8 @@ export async function handleRedditSearch(
 ## Testing Considerations
 
 When testing handlers:
-- Mock Reddit API responses
+- Mock Brainloop API responses
 - Test error scenarios
 - Verify notification sending
 - Check session handling
 - Validate argument parsing
-
-## Extending for New MCP Servers
-
-When adapting this template for a new MCP server:
-
-1. **Replace Tool Handlers**: Create handlers for your domain
-2. **Update Callbacks**: Implement callbacks for your use cases
-3. **Modify Notifications**: Adapt notification types
-4. **Change Services**: Replace Reddit service with your API
-5. **Update Types**: Define your domain-specific types

@@ -1,6 +1,6 @@
 # Constants Directory
 
-This directory contains all static definitions, schemas, and prompts used throughout the Reddit MCP server. It serves as the single source of truth for tool definitions and sampling configurations.
+This directory contains all static definitions, schemas, and prompts used throughout the Brainloop MCP server. It serves as the single source of truth for tool definitions and sampling configurations.
 
 ## Overview
 
@@ -22,8 +22,8 @@ Master list of all available tools:
 
 #### `message-handler.ts`
 Message formatting utilities:
-- Structures Reddit content for display
-- Formats posts, comments, and messages
+- Structures Brainloop content for display
+- Formats course, lesson, and progress data
 - Provides consistent output format
 
 ### Server Configuration (`/server`)
@@ -37,28 +37,28 @@ Server-level configuration and constants:
 
 Each file defines a tool's schema and metadata:
 
-#### Search and Discovery Tools
-- **`search-reddit.ts`** - Search parameters and description
-- **`get-channel.ts`** - Subreddit info retrieval schema
+#### Brainloop Management Tools
+- **`create-brainloop.ts`** - Create new learning courses
+- **`view-brainloops.ts`** - List user's courses
+- **`get-brainloop.ts`** - Get course details
+- **`expand-brainloop.ts`** - Add content to courses
 
-#### Content Retrieval Tools
-- **`get-post.ts`** - Post fetching parameters
-- **`get-comment.ts`** - Comment thread schema
-- **`get-notifications.ts`** - Notification retrieval
+#### Lesson and Unit Tools
+- **`get-unit-lessons.ts`** - Get lessons in a unit
+- **`get-lesson.ts`** - Get lesson details
+- **`update-lesson.ts`** - Update lesson content
+- **`update-unit.ts`** - Update unit information
 
-#### Content Creation Tools
-- **`create-post.ts`** - Post submission schema
-- **`create-comment.ts`** - Comment creation parameters
-- **`create-message.ts`** - Private message schema
+#### Interaction Tools
+- **`create-interaction.ts`** - Create lesson interactions
+- **`create-prompt.ts`** - Create questions/exercises
+- **`get-lesson-prompts.ts`** - Get all prompts for a lesson
 
 
 ### Sampling Definitions (`/sampling`)
 
 Prompts and schemas for AI-assisted operations:
 
-- **`create-post.ts`** - Post generation prompts and schema
-- **`create-comment.ts`** - Comment generation guidance
-- **`create-message.ts`** - Message composition prompts
 - **`suggest-action.ts`** - Action suggestion prompts
 - **`index.ts`** - Exports all sampling messages
 
@@ -202,4 +202,4 @@ When updating schemas:
 3. Test with various inputs
 4. Update documentation
 
-This directory is the foundation of the MCP server's interface - changes here affect how AI clients interact with Reddit.
+This directory is the foundation of the MCP server's interface - changes here affect how AI clients interact with Brainloop.
