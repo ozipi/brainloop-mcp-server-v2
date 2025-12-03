@@ -4,6 +4,7 @@ import { SignJWT, jwtVerify } from "jose";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 
 import type { ServerConfig } from "./config.js";
+import { logger } from "../utils/logger.js";
 
 export interface OAuthConfig extends ServerConfig {
   validRedirectUris: string[];
@@ -120,7 +121,67 @@ export class OAuthProvider {
         },
       };
     } catch (error) {
-      // Auto-refresh logic would go here
+      // Try to auto-refresh if token is expired or invalid
+      // Check if it's an expiration error (jose throws JWTExpired error)
+      const isExpired = error instanceof Error && (
+        error.message.includes("expired") ||
+        error.message.includes("JWTExpired") ||
+        error.name === "JWTExpired"
+      );
+
+      if (isExpired) {
+        try {
+          // Decode expired token to extract refresh token (with clock tolerance to allow expired tokens)
+          const { payload: expiredPayload } = await jwtVerify(token, this.jwtSecret, {
+            audience: "brainloop-mcp-server",
+            issuer: this.config.OAUTH_ISSUER,
+            clockTolerance: 86400 * 7, // Allow 7 days tolerance to decode expired token
+          });
+
+          const googleRefreshToken = expiredPayload.google_refresh_token as string;
+          if (googleRefreshToken) {
+            logger.info("Auto-refreshing expired JWT token", {
+              userId: expiredPayload.sub,
+            });
+
+            // Refresh Google tokens
+            const newGoogleTokens = await this.refreshGoogleAccessToken(googleRefreshToken);
+            
+            // Create new JWT with refreshed tokens
+            const newToken = await this.createAccessToken(
+              expiredPayload.sub as string,
+              newGoogleTokens,
+            );
+
+            // Return new token info
+            const { payload: newPayload } = await jwtVerify(newToken, this.jwtSecret, {
+              audience: "brainloop-mcp-server",
+              issuer: this.config.OAUTH_ISSUER,
+            });
+
+            logger.info("Successfully auto-refreshed JWT token", {
+              userId: newPayload.sub,
+            });
+
+            return {
+              token: newToken,
+              clientId: "mcp-client",
+              scopes: ["read"],
+              expiresAt: newPayload.exp,
+              extra: {
+                userId: newPayload.sub,
+                googleAccessToken: newGoogleTokens.accessToken,
+                googleRefreshToken: newGoogleTokens.refreshToken,
+              },
+            };
+          }
+        } catch (refreshError) {
+          // If refresh fails, throw original error
+          logger.warn("Failed to auto-refresh expired token", {
+            error: refreshError instanceof Error ? refreshError.message : String(refreshError),
+          });
+        }
+      }
       throw new Error("Invalid or expired access token");
     }
   }
@@ -179,7 +240,15 @@ export class OAuthProvider {
       const token = authHeader.slice(7);
 
       try {
+        const originalToken = token;
         req.auth = await this.verifyAccessToken(token, req);
+        
+        // If token was refreshed, return new token in response header
+        if (req.auth.token !== originalToken) {
+          res.setHeader("X-New-Access-Token", req.auth.token);
+          logger.info("Returning refreshed token in response header");
+        }
+        
         next();
       } catch (error) {
         // For SSE requests (GET), provide proper SSE error response
