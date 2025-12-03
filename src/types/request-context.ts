@@ -12,6 +12,9 @@
 
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 
+// Re-export AuthInfo for convenience
+export type { AuthInfo };
+
 /**
  * Extended authentication information with Brainloop-specific data.
  * 

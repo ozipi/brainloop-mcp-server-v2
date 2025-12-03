@@ -278,17 +278,21 @@ export class MCPHandler implements IMCPHandler {
 
       } else if (!sessionId && req.method === 'GET' && this.sessions.size === 1) {
         // For GET requests without session ID, reuse the only existing session if there's exactly one
-        const [onlySessionId, onlySessionInfo] = this.sessions.entries().next().value;
-        sessionInfo = onlySessionInfo;
-        sessionInfo.lastAccessed = new Date();
+        const firstEntry = this.sessions.entries().next().value;
+        if (firstEntry) {
+          const [onlySessionId, onlySessionInfo] = firstEntry;
+          onlySessionInfo.lastAccessed = new Date();
 
-        console.log("📡 [MCP] Reusing single existing session for GET request", {
-          sessionId: onlySessionId,
-          timestamp: new Date().toISOString()
-        });
+          console.log("📡 [MCP] Reusing single existing session for GET request", {
+            sessionId: onlySessionId,
+            timestamp: new Date().toISOString()
+          });
 
-        // Let the session's transport handle the request
-        await sessionInfo.transport.handleRequest(req, res);
+          // Let the session's transport handle the request
+          await onlySessionInfo.transport.handleRequest(req, res);
+          return; // Exit early after handling
+        }
+        // If no entry found (shouldn't happen with size === 1), fall through to create new session
 
       } else if ((sessionId && !this.sessions.has(sessionId)) || (!sessionId && req.method === 'POST')) {
         // Recreate lost session OR create new session for any POST without session ID
